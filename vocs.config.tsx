@@ -4,16 +4,16 @@ export default defineConfig({
 	title: 'Concero Docs',
 	titleTemplate: '%s – Concero Docs',
 	editLink: {
-    pattern: 'https://github.com/concero/docs/edit/master/docs/pages/:path',
-    text: 'Suggest changes to this page',
+		pattern: 'https://github.com/concero/docs/edit/master/docs/pages/:path',
+		text: 'Suggest changes to this page',
 	},
 	// head() {
- //    return (
- //      <>
- //        <script src="https://cdn.usefathom.com/script.js" data-site="IBTUTKMT" defer />
- //      </>
- //    )
- //  },
+	//    return (
+	//      <>
+	//        <script src="https://cdn.usefathom.com/script.js" data-site="IBTUTKMT" defer />
+	//      </>
+	//    )
+	//  },
 	// banner: 'Head to our new [Discord](https://discord.gg/lanca)!',
 	description: 'Build the next big thing on Concero.',
 	baseUrl: 'https://docs.concero.io',
@@ -25,11 +25,11 @@ export default defineConfig({
 	// theme: {
 	// 	// accentColor: '#5E43FF',
 	// },
-	rootDir:	'docs',
+	rootDir: 'docs',
 	ogImageUrl: {
-    '/': '/og.png',
-    '/docs': 'https://docs.concero.io/og?logo=%logo&title=%title&description=%description',
-  },
+		'/': '/og.png',
+		'/docs': 'https://docs.concero.io/og?logo=%logo&title=%title&description=%description',
+	},
 
 	// font: {
 	//   google: 'Manrope'
@@ -61,7 +61,6 @@ export default defineConfig({
 			icon: 'x',
 			link: 'https://twitter.com/concero_io',
 		},
-
 	],
 	sidebar: [
 		{
@@ -85,7 +84,7 @@ export default defineConfig({
 					link: '/cross-chain-infrastructure/interface',
 				},
 				{
-				text: 'Fees',
+					text: 'Fees',
 					link: '/cross-chain-infrastructure/fees',
 				},
 				{
@@ -126,8 +125,8 @@ export default defineConfig({
 				{
 					text: 'Deployments',
 					link: '/cross-chain-liquidity-infrastructure/deployments',
-				}
-				],
+				},
+			],
 		},
 		{
 			text: 'JS SDK (coming soon)',
@@ -166,6 +165,6 @@ export default defineConfig({
 			// 	},
 			//
 			// ]
-		}
+		},
 	],
 })
