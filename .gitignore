@@ -32,3 +32,5 @@ lerna-debug.log*
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
 
+docs/dist
+

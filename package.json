@@ -5,7 +5,8 @@
 	"scripts": {
 		"dev": "vocs dev",
 		"build": "vocs build",
-		"preview": "vocs preview"
+		"preview": "vocs preview",
+		"format:fix": "prettier --write . --ignore-path .prettierignore"
 	},
 	"dependencies": {
 		"@types/react": "latest",
@@ -20,5 +21,10 @@
 		"prettier": "3.3.3",
 		"vitepress-plugin-mermaid": "2.0.16",
 		"husky": "9.1.7"
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "npm run format:fix && npm run build"
+		}
 	}
 }
