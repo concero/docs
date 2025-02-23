@@ -1,0 +1,33 @@
+## Introduction
+
+Concero protocol is designed to enable secure communication between different blockchain networks through a fully decentralized approach. Our cross-chain messaging system is built on top of Chainlink Functions, inheriting their robust security model and decentralized infrastructure.
+
+## Architecture
+
+### Message Flow
+
+
+1. Chainlink Function is triggered when a message is initiated on the source chain.
+
+2. The Chainlink Function on the source chain triggers another Chainlink Function on the destination chain, which verifies that the message was actually sent.
+
+3. The message is safely delivered and executed on the destination chain only after successful verification by the second Chainlink Function.
+
+### Security Model
+
+Our messaging infrastructure inherits Chainlink Functions' security guarantees:
+
+- Decentralized verification of cross-chain messages
+- Cryptographic proof of message authenticity
+- Tamper-proof message delivery
+- Network of independent node operators
+
+## Supported Networks
+
+Currently supported networks:
+
+- Base
+- Polygon
+- Arbitrum
+- Avalanche
+- Optimism

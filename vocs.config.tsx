@@ -72,12 +72,12 @@ export default defineConfig({
 		// 	link: '/getting-started',
 		// },
 		{
-			text: 'Infrastructure',
+			text: 'Overview',
 			collapsed: false,
 			items: [
 				{
-					text: 'Overview',
-					link: '/cross-chain-infrastructure/overview',
+					text: 'Introduction',
+					link: '/cross-chain-infrastructure/Introduction',
 				},
 				{
 					text: 'Interface',
@@ -88,64 +88,14 @@ export default defineConfig({
 					link: '/cross-chain-infrastructure/fees',
 				},
 				{
-					text: 'Architecture',
-					link: '/cross-chain-infrastructure/technical-architecture',
-				},
-				{
-					text: 'Routing',
-					link: '/cross-chain-infrastructure/routing',
-				},
-				{
 					text: 'Tracking',
 					link: '/cross-chain-infrastructure/tracking',
-				},
-				{
-					text: 'Messaging (soon)',
-					link: '/cross-chain-infrastructure/messaging',
 				},
 				{
 					text: 'Deployments',
 					link: '/cross-chain-infrastructure/deployments',
 				},
 			],
-		},
-		{
-			text: 'Liquidity Infrastructure',
-			link: '/cross-chain-liquidity-infrastructure/architecture',
-			collapsed: false,
-			items: [
-				{
-					text: 'Architecture',
-					link: '/cross-chain-liquidity-infrastructure/architecture',
-				},
-				{
-					text: 'Interface',
-					link: '/cross-chain-liquidity-infrastructure/interface',
-				},
-				{
-					text: 'Deployments',
-					link: '/cross-chain-liquidity-infrastructure/deployments',
-				},
-			],
-		},
-		{
-			text: 'JS SDK (coming soon)',
-			// link: '/concero-js-sdk',
-			// items: [
-			// 	{
-			// 		text: 'Overview',
-			// 		link: '/js-sdk/overview',
-			// 	},
-			// 	{
-			// 		text: 'Installation',
-			// 		link: '/js-sdk/installation',
-			// 	},
-			// 	{
-			// 		text: 'Usage',
-			// 		link: '/js-sdk/usage',
-			// 	},
-			//
-			// ]
 		},
 		{
 			text: 'API Endpoints (coming soon)',

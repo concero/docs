@@ -1,88 +1,65 @@
 # Interface
-The interface is the main entrypoint for users or protocols to interact with Concero cross-chain infrastructure. It is responsible for executing the entire transaction on a single chain, allowing a user to perform multiple actions with a single function call.
-## swap
+
+## Concero router
+### Send message
 
 ```solidity
-function swap(struct IDexSwap.SwapData[] _swapData, address _receiver) external payable
+function sendMessage(MessageRequest calldata messageReq) external returns (bytes32)
 ```
-
-Performs a swap on a single chain.
 
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| _swapData | struct IDexSwap.SwapData[] | the swap payload of type IDexSwap.SwapData[] |
-| _receiver | address | the recipient of the swap |
+| messageReq | struct MessageRequest | struct containing the message request data |
 
-## bridge
+
+### Get fee
 
 ```solidity
-function bridge(struct IStorage.BridgeData bridgeData, struct IDexSwap.SwapData[] dstSwapData) external payable
+function getFee(uint64 dstChainSelector, feeToken address, dstChainGasLimit uint32) external view returns (uint256)
 ```
-
-Performs a bridge from the source chain to the destination chain.
 
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| bridgeData | struct IStorage.BridgeData | bridge payload of type BridgeData |
-| dstSwapData | struct IDexSwap.SwapData[] | destination swap payload. May be empty |
+| dstChainSelector | uint64 | destination chain selector |
+| feeToken | address | token address to pay the fee |
+| dstChainGasLimit | uint32 | gas limit on destination chain to process the message |
 
-## swapAndBridge
+## Concero client 
+### Receive message
 
 ```solidity
-function swapAndBridge(struct IStorage.BridgeData bridgeData, struct IDexSwap.SwapData[] srcSwapData, struct IDexSwap.SwapData[] dstSwapData) external payable
+function conceroReceive(Message calldata message) external
 ```
-
-Performs a bridge coupled with the source chain swap and an optional destination chain swap.
 
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| bridgeData | struct IStorage.BridgeData | bridge payload of type BridgeData |
-| srcSwapData | struct IDexSwap.SwapData[] | swap payload for the source chain of type IDexSwap.SwapData[] |
-| dstSwapData | struct IDexSwap.SwapData[] | swap payload for the destination chain of type IDexSwap.SwapData[]. May be empty |
-
+| message | struct Message | struct containing the message data |
 
 ## Types
 
-### BridgeData
+### MessageRequest
 ```solidity
-    struct BridgeData {
-        CCIPToken tokenType;
-        uint256 amount;
-        uint64 dstChainSelector;
+    struct MessageRequest {
+        address feeToken;
         address receiver;
+        uint64 dstChainSelector;
+        uint32 dstChainGasLimit;
+        bytes data;
     }
 ```
 
-### SwapData
+### Message
 ```solidity
-    struct SwapData {
-        DexType dexType;
-        address fromToken;
-        uint256 fromAmount;
-        address toToken;
-        uint256 toAmount;
-        uint256 toAmountMin;
-        bytes dexData;
-    }
-
-    enum DexType {
-        UniswapV2,
-        UniswapV2FoT,
-        SushiV3Single,
-        UniswapV3Single,
-        SushiV3Multi,
-        UniswapV3Multi,
-        Aerodrome,
-        AerodromeFoT,
-        UniswapV2Ether,
-        WrapNative,
-        UnwrapWNative
+    struct Message {
+        bytes32 id;
+        uint64 srcChainSelector;
+        address sender;
+        bytes data;
     }
 ```
-
