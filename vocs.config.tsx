@@ -7,14 +7,6 @@ export default defineConfig({
 		pattern: 'https://github.com/concero/docs/edit/master/docs/pages/:path',
 		text: 'Suggest changes to this page',
 	},
-	// head() {
-	//    return (
-	//      <>
-	//        <script src="https://cdn.usefathom.com/script.js" data-site="IBTUTKMT" defer />
-	//      </>
-	//    )
-	//  },
-	// banner: 'Head to our new [Discord](https://discord.gg/lanca)!',
 	description: 'Build the next big thing on Concero.',
 	baseUrl: 'https://docs.concero.io',
 	iconUrl: 'https://concero.io/favicon.ico',
@@ -22,18 +14,11 @@ export default defineConfig({
 		light: '/logo-light.svg',
 		dark: '/logo-dark.svg',
 	},
-	// theme: {
-	// 	// accentColor: '#5E43FF',
-	// },
 	rootDir: 'docs',
 	ogImageUrl: {
 		'/': '/og.png',
 		'/docs': 'https://docs.concero.io/og?logo=%logo&title=%title&description=%description',
 	},
-
-	// font: {
-	//   google: 'Manrope'
-	// },
 	topNav: [
 		{
 			text: 'Get in touch',
@@ -67,10 +52,6 @@ export default defineConfig({
 			text: 'What is Concero?',
 			link: '/what-is-concero',
 		},
-		// {
-		// 	text: 'Getting Started',
-		// 	link: '/getting-started',
-		// },
 		{
 			text: 'Overview',
 			collapsed: false,
