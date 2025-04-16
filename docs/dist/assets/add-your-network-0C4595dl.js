@@ -1,0 +1,1 @@
+import{u as r,j as o}from"./index-H0SNMatv.js";const a={Title:"Add Your Network",Description:"Learn how to add your network to Concero's messaging protocol."};function e(t){return o.jsx(o.Fragment,{})}function u(t={}){const{wrapper:n}={...r(),...t.components};return n?o.jsx(n,{...t,children:o.jsx(e,{...t})}):e()}export{u as default,a as frontmatter};

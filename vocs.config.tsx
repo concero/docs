@@ -22,9 +22,34 @@ export default defineConfig({
 		light: '/logo-light.svg',
 		dark: '/logo-dark.svg',
 	},
-	// theme: {
-	// 	// accentColor: '#5E43FF',
-	// },
+	theme: {
+		accentColor: {
+			textAccentHover: {
+				light: '#7e54f1', // accent-600
+				dark: '#ad9ff6', // accent-400
+			},
+			borderAccent: {
+				light: '#f3f1fe', // accent-50
+				dark: '#210b5f', // accent-900
+			},
+			backgroundAccent: {
+				light: '#f3f1fe', // accent-50
+				dark: '#210b5f', // accent-900
+			},
+			backgroundAccentHover: {
+				light: '#d9d2fb', // accent-200
+				dark: '#3b13a8', // accent-800
+			},
+			backgroundAccentText: {
+				light: '#5925e6', // accent-700
+				dark: '#efebfe', // accent-100
+			},
+			textAccent: {
+				light: '#7e54f1', // accent-600
+				dark: '#ad9ff6', // accent-400
+			},
+		},
+	},
 	rootDir: 'docs',
 	ogImageUrl: {
 		'/': '/og.png',
@@ -40,12 +65,8 @@ export default defineConfig({
 			link: 'mailto:support@concero.io',
 		},
 		{
-			text: 'Whitepaper',
+			text: 'V1 Whitepaper',
 			link: 'https://www.concero.io/whitepaper.pdf',
-		},
-		{
-			text: 'Audits (soon)',
-			link: '#',
 		},
 	],
 	socials: [
@@ -67,21 +88,25 @@ export default defineConfig({
 			text: 'Get Started',
 			collapsed: false,
 			items: [
+				// {
+				// 	text: 'Overview',
+				// 	link: '/get-started/overview',
+				// },
 				{
-					text: 'Overview',
-					link: '/get-started/overview',
+					text: 'Sending a message',
+					link: '/get-started/sending-a-message',
 				},
 				{
 					text: 'Add your network',
 					link: '/get-started/add-your-network',
 				},
 				{
-					text: 'Sending a message',
-					link: '/get-started/sending-a-message',
-				},
-				{
 					text: 'Deployments',
 					link: '/get-started/deployments',
+				},
+				{
+					text: 'Supported Networks',
+					link: '/get-started/supported-networks',
 				},
 			],
 		},
@@ -89,62 +114,24 @@ export default defineConfig({
 		// 	text: 'Getting Started',
 		// 	link: '/getting-started',
 		// },
-		{
-			text: 'Liquidity Infrastructure',
-			link: '/cross-chain-liquidity-infrastructure/architecture',
-			collapsed: false,
-			items: [
-				{
-					text: 'Architecture',
-					link: '/cross-chain-liquidity-infrastructure/architecture',
-				},
-				{
-					text: 'Interface',
-					link: '/cross-chain-liquidity-infrastructure/interface',
-				},
-				{
-					text: 'Deployments',
-					link: '/cross-chain-liquidity-infrastructure/deployments',
-				},
-			],
-		},
-		{
-			text: 'JS SDK (coming soon)',
-			// link: '/concero-js-sdk',
-			// items: [
-			// 	{
-			// 		text: 'Overview',
-			// 		link: '/js-sdk/overview',
-			// 	},
-			// 	{
-			// 		text: 'Installation',
-			// 		link: '/js-sdk/installation',
-			// 	},
-			// 	{
-			// 		text: 'Usage',
-			// 		link: '/js-sdk/usage',
-			// 	},
-			//
-			// ]
-		},
-		{
-			text: 'API Endpoints (coming soon)',
-			// link: '/api-endpoints',
-			// items: [
-			// 	{
-			// 		text: 'Overview',
-			// 		link: '/api/overview',
-			// 	},
-			// 	{
-			// 		text: 'Routing',
-			// 		link: '/api/routing',
-			// 	},
-			// 	{
-			// 		text: 'Tracking',
-			// 		link: '/api/tracking',
-			// 	},
-			//
-			// ]
-		},
+		// {
+		// 	text: 'Liquidity Infrastructure',
+		// 	link: '/cross-chain-liquidity-infrastructure/architecture',
+		// 	collapsed: true,
+		// 	items: [
+		// 		{
+		// 			text: 'Architecture',
+		// 			link: '/cross-chain-liquidity-infrastructure/architecture',
+		// 		},
+		// 		{
+		// 			text: 'Interface',
+		// 			link: '/cross-chain-liquidity-infrastructure/interface',
+		// 		},
+		// 		{
+		// 			text: 'Deployments',
+		// 			link: '/cross-chain-liquidity-infrastructure/deployments',
+		// 		},
+		// 	],
+		// },
 	],
 })

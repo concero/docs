@@ -6,6 +6,10 @@ export const GITHUB_REPOSITORIES = {
 			MAINNET_DEPLOYMENTS: '/.env.deployments.mainnet',
 		},
 	},
+	RPCS: {
+		SUPPORTED_NETWORKS_URL:
+			'https://raw.githubusercontent.com/concero/rpcs/feature/refactor/output/supported-chains.json',
+	},
 }
 
 export const ROUTER_PROXY_CONFIG = {

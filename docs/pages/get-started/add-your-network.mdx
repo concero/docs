@@ -2,3 +2,34 @@
 Title: Add Your Network
 Description: Learn how to add your network to Concero's messaging protocol.
 ---
+
+
+# Add Your Network
+
+::::steps
+
+### Fund Concero wallets & operators with gas
+
+To enable Concero's cross-chain messaging protocol to operate on your network, fund the following addresses with corresponding gas amounts:
+
+
+
+| Address          | Type | Amount to send |
+|------------------|------------|------------|
+| 0xDddDDb8a8E41C194ac6542a0Ad7bA663A72741E0 | Testnet Deployer | 0.1 ETH |
+| 0xddDd5f804B9D293dce8819d232e8D76381605a62 | Mainnet Deployer | 0.1 ETH |
+| 0x234567890abcdef1 | Operator | 0.01 ETH |
+| 0x34567890abcdef12 | Operator | 0.01 ETH |
+
+
+### Create a pull request to Concero repositories
+
+After funding the operators, submit your network configuration through a pull request:
+
+1. Fork the [Concero Contract Utils Repository](https://github.com/concero/contract-utils) repository
+2. Create a new branch named `add-[YOUR_NETWORK_NAME]`
+3. Add your network configuration in the `/src/networks/testnetNetworks` directory following the template format
+6. Submit a pull request with a detailed description of your network
+7. Respond to any feedback from the Concero team during the review process
+
+::::

@@ -1,0 +1,25 @@
+:root {
+	--accent-50: #f3f1fe;
+	--accent-100: #efebfe;
+	--accent-200: #d9d2fb;
+	--accent-400: #ad9ff6;
+	--accent-600: #7e54f1;
+	--accent-700: #5925e6;
+	--accent-800: #3b13a8;
+	--accent-900: #210b5f;
+
+	--text-accent: var(--accent-800);
+	--text-accent-alt: var(--accent-700);
+	--text-secondary: #666;
+	--text-secondary-alt: #555;
+
+	/* Spacing variables */
+	--spacing-md: 16px;
+	--spacing-lg: 20px;
+
+	/* Border radius */
+	--border-radius: 8px;
+
+	/* Font sizes */
+	--font-size-md: 1.1rem;
+}
