@@ -7,14 +7,6 @@ export default defineConfig({
 		pattern: 'https://github.com/concero/docs/edit/master/docs/pages/:path',
 		text: 'Suggest changes to this page',
 	},
-	// head() {
-	//    return (
-	//      <>
-	//        <script src="https://cdn.usefathom.com/script.js" data-site="IBTUTKMT" defer />
-	//      </>
-	//    )
-	//  },
-	// banner: 'Head to our new [Discord](https://discord.gg/lanca)!',
 	description: 'Build the next big thing on Concero.',
 	baseUrl: 'https://docs.concero.io',
 	iconUrl: 'https://concero.io/favicon.ico',
@@ -22,51 +14,23 @@ export default defineConfig({
 		light: '/logo-light.svg',
 		dark: '/logo-dark.svg',
 	},
-	theme: {
-		accentColor: {
-			textAccentHover: {
-				light: '#7e54f1', // accent-600
-				dark: '#ad9ff6', // accent-400
-			},
-			borderAccent: {
-				light: '#f3f1fe', // accent-50
-				dark: '#210b5f', // accent-900
-			},
-			backgroundAccent: {
-				light: '#f3f1fe', // accent-50
-				dark: '#210b5f', // accent-900
-			},
-			backgroundAccentHover: {
-				light: '#d9d2fb', // accent-200
-				dark: '#3b13a8', // accent-800
-			},
-			backgroundAccentText: {
-				light: '#5925e6', // accent-700
-				dark: '#efebfe', // accent-100
-			},
-			textAccent: {
-				light: '#7e54f1', // accent-600
-				dark: '#ad9ff6', // accent-400
-			},
-		},
-	},
 	rootDir: 'docs',
 	ogImageUrl: {
 		'/': '/og.png',
 		'/docs': 'https://docs.concero.io/og?logo=%logo&title=%title&description=%description',
 	},
-
-	// font: {
-	//   google: 'Manrope'
-	// },
 	topNav: [
 		{
 			text: 'Get in touch',
 			link: 'mailto:support@concero.io',
 		},
 		{
-			text: 'V1 Whitepaper',
+			text: 'Whitepaper',
 			link: 'https://www.concero.io/whitepaper.pdf',
+		},
+		{
+			text: 'Audits (soon)',
+			link: '#',
 		},
 	],
 	socials: [
@@ -85,53 +49,53 @@ export default defineConfig({
 	],
 	sidebar: [
 		{
-			text: 'Get Started',
+			text: 'What is Concero?',
+			link: '/what-is-concero',
+		},
+		{
+			text: 'Overview',
 			collapsed: false,
 			items: [
-				// {
-				// 	text: 'Overview',
-				// 	link: '/get-started/overview',
-				// },
 				{
-					text: 'Sending a message',
-					link: '/get-started/sending-a-message',
+					text: 'Introduction',
+					link: '/cross-chain-infrastructure/Introduction',
 				},
 				{
-					text: 'Add your network',
-					link: '/get-started/add-your-network',
+					text: 'Interface',
+					link: '/cross-chain-infrastructure/interface',
+				},
+				{
+					text: 'Fees',
+					link: '/cross-chain-infrastructure/fees',
+				},
+				{
+					text: 'Tracking',
+					link: '/cross-chain-infrastructure/tracking',
 				},
 				{
 					text: 'Deployments',
-					link: '/get-started/deployments',
-				},
-				{
-					text: 'Supported Networks',
-					link: '/get-started/supported-networks',
+					link: '/cross-chain-infrastructure/deployments',
 				},
 			],
 		},
-		// {
-		// 	text: 'Getting Started',
-		// 	link: '/getting-started',
-		// },
-		// {
-		// 	text: 'Liquidity Infrastructure',
-		// 	link: '/cross-chain-liquidity-infrastructure/architecture',
-		// 	collapsed: true,
-		// 	items: [
-		// 		{
-		// 			text: 'Architecture',
-		// 			link: '/cross-chain-liquidity-infrastructure/architecture',
-		// 		},
-		// 		{
-		// 			text: 'Interface',
-		// 			link: '/cross-chain-liquidity-infrastructure/interface',
-		// 		},
-		// 		{
-		// 			text: 'Deployments',
-		// 			link: '/cross-chain-liquidity-infrastructure/deployments',
-		// 		},
-		// 	],
-		// },
+		{
+			text: 'API Endpoints (coming soon)',
+			// link: '/api-endpoints',
+			// items: [
+			// 	{
+			// 		text: 'Overview',
+			// 		link: '/api/overview',
+			// 	},
+			// 	{
+			// 		text: 'Routing',
+			// 		link: '/api/routing',
+			// 	},
+			// 	{
+			// 		text: 'Tracking',
+			// 		link: '/api/tracking',
+			// 	},
+			//
+			// ]
+		},
 	],
 })

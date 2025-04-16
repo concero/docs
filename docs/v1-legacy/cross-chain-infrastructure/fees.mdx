@@ -5,20 +5,8 @@ Concero cross-chain infrastructure is designed to be as cost-effective as possib
 
 ## Fees Breakdown
 
-| Fee Type                        | Percentage | Charged                                      |
-|---------------------------------|------------|----------------------------------------------|
-| Concero Fee                     | 0.1%       | Always                                       |
-| Liquidity Provider Fee          | 0.1%       | Only for cross-chain transactions            |
-| Integrator Fee                  | 0.1%       | For third-party integrations                 |
-
-- **Concero Fee**: This is a standard fee charged by Concero for using its cross-chain infrastructure.
-- **Liquidity Provider Fee**: This fee is charged by the liquidity providers and is only applicable for cross-chain transactions.
-- **Integrator Fee**: This fee is applicable for third-party integrations and is charged by the integrators for their services.
-
-## Gas Abstraction
-
-Gas abstraction in Concero's cross-chain infrastructure ensures that users do not have to worry about gas costs on the destination chain. Instead, a portion of the source token is used to cover all gas costs, apart from the ones required to initiate the transaction on the source chain. All other costs incurred by the system are automatically deducted from the source token, simplifying the process and making it more user-friendly. 
-
-:::note
-We are actively working on pushing the limits of gas abstraction and are working on enabling fully gas-abstracted transactions.
-:::
+| Fee Type                        | Description                                                                 |
+|---------------------------------|-----------------------------------------------------------------------------|
+| Chainlink Function Fees         | Covers the cost of two Chainlink Function executions                        |
+| Concero Fee                     | A fixed fee of 1 cent charged by Concero                                    |
+| Messenger Gas Fee               | Covers the gas costs for message delivery on the destination chain, which vary based on the gas prices on the destination chain |
