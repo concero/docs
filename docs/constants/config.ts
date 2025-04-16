@@ -1,0 +1,16 @@
+export const GITHUB_REPOSITORIES = {
+	MESSAGING_CONTRACTS_V2: {
+		BASE_URL: 'https://raw.githubusercontent.com/concero/messaging-contracts-v2/refs/heads/master',
+		FILES: {
+			TESTNET_DEPLOYMENTS: '/.env.deployments.testnet',
+			MAINNET_DEPLOYMENTS: '/.env.deployments.mainnet',
+		},
+	},
+}
+
+export const ROUTER_PROXY_CONFIG = {
+	VARIABLE_PREFIX: 'CONCERO_ROUTER_PROXY',
+	ADMIN_SUFFIX: '_ADMIN',
+}
+
+export type NetworkEnvironment = 'testnet' | 'mainnet'

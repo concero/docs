@@ -1,0 +1,110 @@
+---
+Title: Send a Message
+Description: Learn how to send a cross-chain message using Concero's messaging protocol.
+---
+
+# Sending a Message
+
+Concero allows you to send messages from one blockchain to another using the `conceroSend` function. This enables cross-chain communication for a variety of use cases such as cross-chain token transfers, governance actions, or any custom cross-chain interactions.
+
+## Function Signature
+
+```solidity
+function conceroSend(
+    uint24 dstChainSelector,
+    bool shouldFinaliseSrc,
+    address feeToken,
+    ConceroTypes.EvmDstChainData memory dstChainData,
+    bytes calldata message
+) external payable returns (bytes32)
+```
+
+## Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `dstChainSelector` | `uint24` | Identifier for the destination chain |
+| `shouldFinaliseSrc` | `bool` | Flag for source chain finality (must be `false` as it's not yet supported) |
+| `feeToken` | `address` | Token used to pay transaction fees (currently only native tokens are supported, so this must be `address(0)`) |
+| `dstChainData` | `ConceroTypes.EvmDstChainData` | Structure containing destination chain execution parameters |
+| `message` | `bytes` | The message payload to be sent to the destination chain |
+
+### EvmDstChainData Structure
+
+```solidity
+struct EvmDstChainData {
+    address receiver;  // The contract to receive the message on the destination chain
+    uint256 gasLimit;  // Gas limit for the message execution on the destination chain.
+}
+```
+:::info
+Make sure `gasLimit` is sufficient, otherwise the message will revert with an out-of-gas error.
+:::
+
+## Return Value
+
+| Type | Description |
+|------|-------------|
+| `bytes32` | A unique message identifier that can be used to track the message |
+
+## Usage Example
+
+```solidity
+import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
+import {ConceroTypes} from "@concero/contracts/interfaces/ConceroTypes.sol";
+import {ConceroClient} from "./ConceroClient.sol";
+
+contract MessageSender {
+  constructor(address conceroRouter) ConceroClient(conceroRouter) {}
+
+  function sendCrossChainMessage(
+      uint24 dstChainSelector,
+      address receiver,
+      uint256 gasLimit,
+      bytes memory messageBody
+  ) external payable {
+
+      // 1. Quote message fee
+      uint256 messageFeeNative = IConceroRouter(i_conceroRouter).getMessageFee(
+        dstChainSelector,
+        false, // Source chain finality not yet supported
+        address(0), // Using native token for fees
+        dstData
+      );
+
+      // 2. Prepare destination chain data
+      ConceroTypes.EvmDstChainData memory dstData = ConceroTypes.EvmDstChainData({
+        receiver: receiver,
+        gasLimit: gasLimit
+      });
+
+      // 3. Send the cross-chain message
+      bytes32 messageId = IConceroRouter(i_conceroRouter).conceroSend{value: messageFeeNative}(
+        dstChainSelector,
+        false, // Source chain finality not yet supported
+        address(0), // Using native token for fees
+        dstData,
+        messageBody
+      );
+  }
+}
+```
+
+## Important Notes
+   - Source chain finality is not yet supported, so `shouldFinaliseSrc` must be `false`
+   - Currently only native value is supported for fee payment (ETH, MATIC, etc.)
+
+## ConceroMessageSent Event
+
+When a message is sent, a `ConceroMessageSent` event is emitted with the following parameters:
+
+```solidity
+event ConceroMessageSent(
+    bytes32 indexed messageId,
+    uint16 version,
+    bool shouldFinaliseSrc,
+    uint24 dstChainSelector,
+    bytes dstChainData,
+    address sender,
+    bytes message
+);
