@@ -1,8 +1,0 @@
-import{u as i,j as e}from"./index-0tZQT2DK.js";const r={title:"Contract Deployments",description:"undefined"};function d(t){const n={a:"a",div:"div",h1:"h1",h2:"h2",header:"header",li:"li",ul:"ul",...i(),...t.components};return e.jsxs(e.Fragment,{children:[e.jsx(n.header,{children:e.jsxs(n.h1,{id:"contract-deployments",children:["Contract Deployments",e.jsx(n.a,{"aria-hidden":"true",tabIndex:"-1",href:"#contract-deployments",children:e.jsx(n.div,{"data-autolink-icon":!0})})]})}),`
-`,e.jsxs(n.h2,{id:"liquidity-pools",children:["Liquidity Pools",e.jsx(n.a,{"aria-hidden":"true",tabIndex:"-1",href:"#liquidity-pools",children:e.jsx(n.div,{"data-autolink-icon":!0})})]}),`
-`,e.jsxs(n.ul,{children:[`
-`,e.jsxs(n.li,{children:["Base (For liquidity provision):	",e.jsx(n.a,{href:"https://etherscan.io/address/0x0AE1B2730066AD46481ab0a5fd2B5893f8aBa323",children:"0x0AE1B2730066AD46481ab0a5fd2B5893f8aBa323"})]}),`
-`,e.jsxs(n.li,{children:["Arbitrum: ",e.jsx(n.a,{href:"https://arbiscan.io/address/0x164c20A4E11cBE0d8B5e23F5EE35675890BE280d",children:"0x164c20A4E11cBE0d8B5e23F5EE35675890BE280d"})]}),`
-`,e.jsxs(n.li,{children:["Polygon: ",e.jsx(n.a,{href:"https://polygonscan.com/address/0x164c20A4E11cBE0d8B5e23F5EE35675890BE280d",children:"0x164c20A4E11cBE0d8B5e23F5EE35675890BE280d"})]}),`
-`,e.jsxs(n.li,{children:["Avalanche: ",e.jsx(n.a,{href:"https://cchain.explorer.avax.network/address/0x164c20A4E11cBE0d8B5e23F5EE35675890BE280d",children:"0x164c20A4E11cBE0d8B5e23F5EE35675890BE280d"})]}),`
-`]})]})}function a(t={}){const{wrapper:n}={...i(),...t.components};return n?e.jsx(n,{...t,children:e.jsx(d,{...t})}):d(t)}export{a as default,r as frontmatter};

@@ -1,23 +1,24 @@
 {
-  "name": "docs",
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vocs dev",
-    "build": "vocs build",
-    "preview": "vocs preview"
-  },
-  "dependencies": {
-    "@types/react": "latest",
-    "@vercel/og": "^0.6.2",
-    "react": "latest",
-    "react-dom": "latest",
-    "typescript": "latest",
-    "vocs": "latest"
-  },
-  "devDependencies": {
-    "mermaid": "^10.9.1",
-    "prettier": "^3.3.3",
-    "vitepress-plugin-mermaid": "^2.0.16"
-  }
+	"name": "docs",
+	"version": "1.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vocs dev",
+		"build": "vocs build",
+		"preview": "vocs preview"
+	},
+	"engines": {
+		"node": ">=22.0.0"
+	},
+	"dependencies": {
+		"@types/react": "18.2.0",
+		"@vercel/og": "^0.6.8",
+		"react": "18.2.0",
+		"react-dom": "18.2.0",
+		"typescript": "5.8.3",
+		"vocs": "1.0.11"
+	},
+	"devDependencies": {
+		"prettier": "^3.5.3"
+	}
 }
