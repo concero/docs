@@ -12,8 +12,6 @@ Description: Learn how to add your network to Concero's messaging protocol.
 
 To enable Concero's cross-chain messaging protocol to operate on your network, fund the following addresses with corresponding gas amounts:
 
-
-
 | Address          | Type | Amount to send |
 |------------------|------------|------------|
 | 0xDddDDb8a8E41C194ac6542a0Ad7bA663A72741E0 | Testnet Deployer | 0.1 ETH |
@@ -28,88 +26,7 @@ After funding the operators, submit your network configuration through a pull re
 
 1. Fork the [v2-networks repository](https://github.com/concero/v2-networks)
 2. Create a new branch named `add-[YOUR_NETWORK_NAME]`
-3. Create individual chain files following the repository structure and required format
-4. Update the appropriate aggregated files
-5. Submit a pull request with a detailed description of your network
-6. Respond to any feedback from the Concero team during the review process
-
-### Repository Structure
-
-The v2-networks repository is organized as follows:
-
-```
-networks/
-├── mainnet/
-│   ├── network1.json
-│   ├── network2.json
-│   └── ...
-├── testnet/
-│   ├── network1.json
-│   ├── network2.json
-│   └── ...
-├── mainnet.json
-└── testnet.json
-```
-
-- `mainnet/`: Contains individual JSON files for each production network
-- `testnet/`: Contains individual JSON files for each test network
-- `mainnet.json`: An aggregated file with simplified information for all production networks
-- `testnet.json`: An aggregated file with simplified information for all test networks
-
-### File Format and Naming Conventions
-
-#### Individual Chain Files
-
-Create a JSON file for your network with the following structure:
-
-```json
-{
-    "name": "yourNetworkName",
-    "chainId": 12345,
-    "chainSelector": 12345,
-    "rpcs": [
-        "https://rpc1.yournetwork.com",
-        "https://rpc2.yournetwork.com"
-    ],
-    "blockExplorers": [
-        {
-            "name": "YourExplorer",
-            "url": "https://explorer.yournetwork.com",
-            "apiUrl": "https://api.explorer.yournetwork.com/api"
-        }
-    ],
-    "faucets": ["https://faucet.yournetwork.com/"]
-}
-```
-
-File naming convention: Use camelCase for your network name (e.g., `arbitrumSepolia.json`, `baseSepolia.json`).
-
-#### Aggregated Files
-
-Add your network entry to either `mainnet.json` or `testnet.json` (or both, if applicable):
-
-```json
-{
-    "arbitrumSepolia": {
-        "chainId": 1111,
-        "chainSelector": 1111
-    },
-    "yourNetworkName": {
-        "chainId": 12345,
-        "chainSelector": 12345
-    }
-}
-```
-
-### Requirements and Review Process
-
-Ensure your submission meets these requirements:
-
-- Chain names should be in camelCase
-- Chain IDs must be unique and match the actual network's chain ID
-- Chain selectors must be unique and fit into uint24, matching the chain ID if possible
-- RPCs must be provided if no public RPC endpoints are available
-
-After submitting your pull request, the Concero team will review your submission. We may request changes or additional information before merging your network into the repository.
+3. Follow the PR guidelines in the [README.md](https://github.com/concero/v2-networks/blob/main/README.md)
+4. Submit a pull request, so the Concero team can review your submission. We may request changes or additional information before merging your network into the repository.
 
 ::::
