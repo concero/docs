@@ -8,6 +8,9 @@
 		"preview": "vocs preview",
 		"format:fix": "prettier --write . --ignore-path .prettierignore"
 	},
+	"engines": {
+		"node": ">=22.0.0"
+	},
 	"dependencies": {
 		"@types/react": "latest",
 		"@vercel/og": "0.6.2",

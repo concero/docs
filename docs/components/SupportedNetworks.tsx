@@ -2,9 +2,13 @@ import { useState, useEffect } from 'react'
 import Switch from './Switch'
 import { GITHUB_REPOSITORIES } from '../constants/config'
 
-interface NetworksData {
-	mainnet: Record<string, string>
-	testnet: Record<string, string>
+interface NetworkData {
+	chainId: number
+	chainSelector: number
+}
+
+interface NetworksMap {
+	[networkName: string]: NetworkData
 }
 
 type NetworkEnvironment = 'mainnet' | 'testnet'
@@ -16,9 +20,12 @@ function formatNetworkName(name: string): string {
 		.trim()
 }
 
-function NetworkList({ networks, environment }: { networks: NetworksData; environment: NetworkEnvironment }) {
-	const currentNetworks = networks[environment]
-	const networkCount = Object.keys(currentNetworks).length
+function NetworkList({ networks, environment }: { networks: NetworksMap | null; environment: NetworkEnvironment }) {
+	if (!networks) {
+		return null
+	}
+
+	const networkCount = Object.keys(networks).length
 
 	return (
 		<div>
@@ -34,9 +41,9 @@ function NetworkList({ networks, environment }: { networks: NetworksData; enviro
 					marginTop: 'var(--spacing-lg)',
 				}}
 			>
-				{Object.entries(currentNetworks).map(([chainId, networkName]) => (
+				{Object.entries(networks).map(([networkName, networkData]) => (
 					<div
-						key={chainId}
+						key={networkName}
 						style={{
 							padding: 'var(--spacing-md)',
 							borderRadius: 'var(--border-radius)',
@@ -48,8 +55,8 @@ function NetworkList({ networks, environment }: { networks: NetworksData; enviro
 						}}
 					>
 						{formatNetworkName(networkName)}
-
-						<div style={{ color: 'gray' }}>Chain ID: {chainId}</div>
+						<div style={{ color: 'gray' }}>Chain ID: {networkData.chainId}</div>
+						<div style={{ color: 'gray' }}>Chain Selector: {networkData.chainSelector}</div>
 					</div>
 				))}
 			</div>
@@ -58,7 +65,7 @@ function NetworkList({ networks, environment }: { networks: NetworksData; enviro
 }
 
 export function SupportedNetworks() {
-	const [networks, setNetworks] = useState<NetworksData | null>(null)
+	const [networks, setNetworks] = useState<NetworksMap | null>(null)
 	const [loading, setLoading] = useState<boolean>(true)
 	const [error, setError] = useState<string | null>(null)
 	const [environment, setEnvironment] = useState<NetworkEnvironment>('mainnet')
@@ -68,7 +75,12 @@ export function SupportedNetworks() {
 			try {
 				setLoading(true)
 
-				const response = await fetch(GITHUB_REPOSITORIES.RPCS.SUPPORTED_NETWORKS_URL, {
+				const networkUrl =
+					environment === 'mainnet'
+						? `${GITHUB_REPOSITORIES.V2_NETWORKS.NETWORKS_URL}/mainnet.json`
+						: `${GITHUB_REPOSITORIES.V2_NETWORKS.NETWORKS_URL}/testnet.json`
+
+				const response = await fetch(networkUrl, {
 					headers: {
 						Accept: 'application/json',
 					},
@@ -80,10 +92,10 @@ export function SupportedNetworks() {
 				}
 
 				const text = await response.text()
-				let data: NetworksData
+				let data: NetworksMap
 
 				try {
-					data = JSON.parse(text) as NetworksData
+					data = JSON.parse(text) as NetworksMap
 				} catch (parseError) {
 					throw new Error(`Failed to parse JSON response: ${text.substring(0, 100)}...`)
 				}
@@ -99,7 +111,7 @@ export function SupportedNetworks() {
 		}
 
 		fetchNetworks()
-	}, [])
+	}, [environment])
 
 	const handleEnvironmentToggle = (isMainnet: boolean): void => {
 		setEnvironment(isMainnet ? 'mainnet' : 'testnet')
@@ -126,7 +138,12 @@ export function SupportedNetworks() {
 					marginBottom: 'var(--spacing-lg)',
 				}}
 			>
-				<Switch isOn={environment === 'mainnet'} onToggle={handleEnvironmentToggle} offLabel="Testnet" onLabel="Mainnet" />
+				<Switch
+					isOn={environment === 'mainnet'}
+					onToggle={handleEnvironmentToggle}
+					offLabel="Testnet"
+					onLabel="Mainnet"
+				/>
 			</div>
 
 			<NetworkList networks={networks} environment={environment} />

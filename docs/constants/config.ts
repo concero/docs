@@ -10,6 +10,9 @@ export const GITHUB_REPOSITORIES = {
 		SUPPORTED_NETWORKS_URL:
 			'https://raw.githubusercontent.com/concero/rpcs/feature/refactor/output/supported-chains.json',
 	},
+	V2_NETWORKS: {
+		NETWORKS_URL: 'https://raw.githubusercontent.com/concero/v2-networks/refs/heads/master/networks',
+	},
 }
 
 export const ROUTER_PROXY_CONFIG = {
