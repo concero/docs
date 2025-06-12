@@ -97,6 +97,10 @@ export default defineConfig({
 					link: '/get-started/sending-a-message',
 				},
 				{
+					text: 'Receive a message',
+					link: '/get-started/receive-a-message',
+				},
+				{
 					text: 'Add your network',
 					link: '/get-started/add-your-network',
 				},
