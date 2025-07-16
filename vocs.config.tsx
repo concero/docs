@@ -145,6 +145,10 @@ export default defineConfig({
 					text: 'Concero V2 Scalability',
 					link: '/concero-v2-scalability',
 				},
+				{
+					text: 'Relayers',
+					link: '/relayers',
+				},
 			],
 		},
 		// {

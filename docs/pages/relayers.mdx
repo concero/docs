@@ -1,0 +1,187 @@
+---
+title: Concero V2 Relayers
+description: Documentation for Concero V2 relayers, describing the technical architecture, responsibilities, and registration process
+---
+
+# Concero V2 Relayers
+
+This documentation provides detailed information for relayers in Concero V2, explaining the technical architecture, component responsibilities, and the process for relayer registration and deregistration.
+
+## Deposits, Registration & De-registration
+
+Relayers must complete a specific process to join the Concero V2 network. This process involves depositing funds, requesting registration, and passing verification checks before becoming an active relayer.
+
+### Deposit Requirements
+
+Before registration, an relayer must deposit funds that will serve as:
+- A security deposit for participation in the network
+- Funds required for executing at least a single Chainlink Functions run
+- A stake that can be slashed in case of malicious behavior
+
+The deposit is held in the ConceroVerifier contract and is essential for the economic security of the network. Relayers must maintain sufficient deposits to cover their operations within the network.
+
+### Registration Process
+
+The registration process consists of the following steps:
+
+1. **Deposit Funds**: The relayer deposits the required amount of native tokens to the ConceroVerifier contract.
+
+2. **Request Registration**: The relayer invokes the `requestOperatorRegistration` function with the following parameters:
+   - `chainTypes`: Array of chain types the relayer wants to support (0 for EVMs, others to be added in the future)
+   - `operatorActions`: Array of registration actions for the relayer per chain type
+   - `operatorAddresses`: Array of relayer addresses for registration per chain type
+
+3. **Deposit Withholding**: During registration, the system will withhold a portion of the relayer's deposit using the `_witholdOperatorDeposit` function. This withheld amount is calculated based on the `OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD` constant and the current native-to-USD conversion rate.
+
+4. **Chainlink Functions Verification**: After registration is requested, Chainlink Functions performs verification checks to ensure that:
+   - The relayer has enough slashable delegated stake on Symbiotic contracts
+   - The relayer meets all technical requirements for participation
+
+5. **Registration Confirmation**: If the verification is successful, Chainlink Functions returns a successful registration report, and the relayer is marked as registered in the system.
+
+6. **Begin Operations**: Once registered, the relayer can begin operations on the Concero V2 network, participating in message validation and delivery.
+
+### De-registration Process
+
+Relayers can also request to leave the network through a de-registration process:
+
+1. **Request De-registration**: The relayer invokes the `_requestOperatorDeregistration` function.
+
+2. **Verification**: Similar to registration, ConceroVerifier ensures that the relayer can safely exit the network without compromising ongoing operations.
+
+3. **Deposit Return**: After a successful de-registration, any remaining deposits (minus withheld amounts for pending operations) are returned to the relayer.
+
+## Relayer Responsibilities
+
+Once registered, relayers in the Concero V2 network are responsible for:
+
+1. **Message Validation**: Requesting validation reports from Chainlink Functions for cross-chain messages.
+
+2. **Message Delivery**: Delivering validated messages to destination chains within their allocated time window.
+
+3. **Maintaining Uptime**: Ensuring their node remains operational to avoid downtime penalties.
+
+4. **Deposit Management**: Maintaining sufficient deposits to cover their operations and potential slashing events.
+
+By fulfilling these responsibilities, relayers earn rewards from:
+- Report request rewards from the verifier contract
+- Message delivery rewards from router contracts
+
+Relayers who fail to deliver messages within their designated time slot (10-second window) may face downtime penalties, resulting in their turn being passed to another relayer.
+
+## Technical Architecture
+
+The Concero V2 relayer software consists of several specialized managers that work together to enable secure cross-chain communication. Each manager has specific responsibilities within the system:
+
+![Concero V2 Relayer Technical Architecture](/images/concero-v2-relayers.jpg)
+
+### Block Manager Registry
+
+The Block Manager Registry serves as a central repository for network-specific BlockManagers. It:
+- Maintains a registry of BlockManagers for different networks
+- Ensures the appropriate BlockManager is used for each supported blockchain network
+- Facilitates the creation and disposal of BlockManagers as needed
+
+### Block Manager
+
+The Block Manager is responsible for blockchain data retrieval and acts as:
+- A block fetcher for a specific network
+- Returns block ranges to subscribers
+- Handles the actual interaction with blockchain nodes
+- Operates on a single network basis
+
+### Block Checkpoint Manager
+
+The Block Checkpoint Manager provides resilience by:
+- Keeping track of the latest processed blocks
+- Enabling recovery from checkpoints after downtime
+- Ensuring continuity of operations even after system interruptions
+- Maintaining the state required for reliable blockchain monitoring
+
+### DB Manager
+
+The DB Manager enables persistent storage by:
+- Facilitating interactions with the database through Prisma Client
+- Managing data persistence for the relayer
+- Handling database operations for various managers
+- Providing a unified interface for data access and storage
+
+### Viem Client Manager
+
+The Viem Client Manager handles blockchain client connections by:
+- Creating and updating Viem Fallback Clients for each network
+- Managing client connections to multiple networks
+- Ensuring reliable blockchain connectivity
+- Providing optimized client instances for blockchain interactions
+
+### RPC Manager
+
+The RPC Manager handles remote procedure call endpoints by:
+- Watching `@concero/rpcs` and keeping an updatable list of RPC endpoints
+- Managing RPC endpoint availability and health
+- Facilitating communication with blockchain nodes
+- Optimizing RPC usage across supported networks
+
+### Network Manager
+
+The Network Manager oversees supported networks by:
+- Watching `@concero/v2-networks` to keep track of active networks
+- Maintaining an updated list of active and supported networks
+- Facilitating the `fetchNetworkConfigs` operation with the HTTP Client
+- Enabling dynamic addition and management of network support
+
+### TX Manager
+
+The TX Manager serves as the central transaction coordination layer by:
+- Providing a high-level interface for both reading and writing to all networks
+- Coordinating between the TX Reader, TX Writer, and TX Monitor
+- Managing transaction operations across all supported networks
+- Acting as the main entry point for transaction-related operations
+
+### TX Reader
+
+The TX Reader focuses on blockchain data retrieval by:
+- Handling all log-reading operations for all networks
+- Reading and parsing blockchain events and data
+- Providing standardized access to blockchain data
+- Supporting the TX Manager with read operations
+
+### TX Writer
+
+The TX Writer handles blockchain write operations by:
+- Managing write operations for all networks
+- Submitting transactions to blockchains
+- Handling transaction signing and submission
+- Supporting the TX Manager with write operations
+
+### TX Monitor
+
+The TX Monitor ensures transaction reliability by:
+- Ensuring transactions remain in the blockchain until finality
+- Monitoring transaction status and confirmations
+- Retrying transactions via TX Writer if needed
+- Providing transaction status updates
+
+### Nonce Manager
+
+The Nonce Manager optimizes transaction throughput by:
+- Managing custom nonce tracking for Viem
+- Enabling faster transaction throughput
+- Ensuring proper transaction ordering
+- Preventing nonce-related transaction failures
+
+### HTTP Client
+
+The HTTP Client facilitates external API communication by:
+- Facilitating GET/POST HTTP requests
+- Supporting network configuration retrieval
+- Enabling communication with external services
+- Providing standardized HTTP request functionality
+
+### Deployment Manager
+
+The Deployment Manager tracks contract deployments by:
+- Keeping updatable lists of ConceroVerifier and ConceroRouter contracts
+- Tracking deployment addresses across networks
+- Enabling interaction with deployed contracts
+- Facilitating contract upgrades and management
