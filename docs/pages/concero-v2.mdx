@@ -22,6 +22,9 @@ Concero V2 builds upon V1's foundation while introducing significant improvement
 - **Unlimited network reach**: Leveraging relayer nodes economically secured by Symbiotic restaking and coupled with Chainlink Functions
 - **Modularity**: Greater control over modules required to confirm cross-chain messages
 - **Unlimited transmitted data size**: Up to 1.875 MB per message (on EVM chains)
+- **Fast scalability**: Unprecedented ability to rapidly onboard new blockchains without deploying new nodes, making interoperability a universal utility
+
+For a deeper exploration of how Concero V2 transforms blockchain interoperability into a public good through its scalable architecture, see our technical document on [Concero's Scalable Interoperability](/docs/pages/concero-scalable-interoperability).
 
 | Protocol   | Data limits per message |
 | ---------- | ----------------------- |
@@ -66,16 +69,24 @@ Deployed on every supported network, router contracts serve as the entry point f
 - **Releasing outbound messages**: Delivering validated messages to their destination
 
 Router contracts also handle administrative functions like:
-- Registering and de-registering operators
-- Managing reward distribution
-- Tracking delegated stake for each operator
+- Managing reward distribution for message delivery
+- Collecting delivery fees for relayers
+
+### Concero Verifier
+
+The Concero Verifier is a central component of the architecture that:
+- Collects operator deposits
+- Manages registration and de-registration of operators
+- Serves as the first verifying module in the protocol using Chainlink Functions on Arbitrum
+- Collects fees for relayers requesting validation reports
+- Rewards relayers upon successful report requests
 
 ### Chainlink Functions
 
 Chainlink Functions serves as a trust-minimized verifiable compute layer that enables essential operations:
 
 - Validates transaction presence on source chains
-- Computation runs on the Base network across four nodes in the Chainlink Functions Decentralized Oracle Network (DON)
+- Computation runs on the Arbitrum network across four nodes in the Chainlink Functions Decentralized Oracle Network (DON)
 - Currently serves as the default and only validation module
 - Generates cryptographically signed validation reports that confirm transaction validity
 
@@ -99,11 +110,14 @@ As a restaking protocol, Symbiotic provides economic security by:
 ### Operator Rewards and Slashing
 
 #### Rewards
-Rewards are collected on router contracts and distributed to relayers
+Rewards are collected on both verifier and router contracts and distributed to relayers for two distinct operations:
+- Report request rewards from the verifier contract
+- Message delivery rewards from router contracts
 
 #### Slashing
 Slashing penalties apply to relayers in specific scenarios:
 - Message fulfillment failures within designated time slots
+- Each relayer has a 10-second window to submit the message, after which they are considered downtiming
 - The challenge period for disputing transactions is approximately 10-20 seconds
 
 ### Relayer Nodes
@@ -123,7 +137,7 @@ Concero V2 supports integration with existing interoperability protocols:
 
 1. User sends a message to the source chain router contract
 - The relayer captures the emitted event from the source chain
-- The relayer forwards the message to the Master Chain (Base) to request validation through Chainlink Functions
+- The relayer forwards the message to the Master Chain (Arbitrum) to request validation through Chainlink Functions
 - Chainlink Functions returns the validation report to the CLF chain
 - The relayer captures, decodes, and forwards the report with transaction data to the destination chain
 6. Destination router contract verifies the report and releases the transaction
@@ -132,20 +146,20 @@ Concero V2 supports integration with existing interoperability protocols:
 
 ### Message Fees
 
-| Fee Type              | Amount       |
-| --------------------- | ------------ |
-| Concero Fee           | 1 cent USD   |
-| Chainlink Functions   | ~5 cent USD  |
-| Relayer Fee           | TBA          |
+| Fee Type                    | Amount       |
+| --------------------------- | ------------ |
+| Concero                     | 1 cent USD   |
+| Chainlink Functions         | ~5 cent USD  |
+| Relayer Report Request      | TBD          |
+| Relayer Delivery            | TBD          |
 
 - **Concero Fee**: Standard fee applied to all messages
 - **Chainlink Functions Fee**: Cost for the default verification module
 :::note
-(CLF callback cost heavilydepends on Master Chain gas prices, in our case Arbitrum)
+(CLF callback cost heavily depends on Master Chain gas prices, in our case Arbitrum)
 :::
-- **Relayer Fee**: Covers two key operations:
-  - Relaying from source chain to master chain verifier
-  - Relaying validation report to destination chain router
+- **Relayer Report Request Fee**: Fixed fee paid to relayers for requesting validation reports from the Concero Verifier; upon successful report request, the relayer gets their deposit back for this request and earns this reward
+- **Relayer Delivery Fee**: Fixed fee paid to relayers for delivering the validation report to the destination chain; the relayer receives this fee upon successful delivery
 
 ## Risk Mitigation
 
@@ -161,8 +175,18 @@ In the unlikely event of DON node compromise:
 - Future implementations will allow additional validation modules to be enabled
 - Validation requirements prevent message release if verification fails
 
-### Denial of Service Protection
+### Centralized RPC Risks
 
-To minimize service interruption risks:
+The protocol faces risks from centralized RPC providers:
+- Manipulation of data served by RPC providers
+- Downtime of RPC services can halt the system
+- To circumvent this, the Concero team is working on a decentralized RPC marketplace which is to be announced
+
+### Relayer DOS Protection
+
+To minimize service interruption risks from relayer denial of service:
 - Economic incentives ensure sufficient node operator participation
+- Slashing mechanisms for relayer downtime
+- Permissionless addition of relayers creates a decentralized network
+- 10-second window per relayer after which the next relayer can take over
 - The protocol balances rewards between operators and users
