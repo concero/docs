@@ -126,6 +126,10 @@ export default defineConfig({
 					text: 'Concero V2 Architecture',
 					link: '/concero-v2',
 				},
+				{
+					text: 'Concero V2 Scalability',
+					link: '/concero-v2-scalability',
+				},
 			],
 		},
 		// {
