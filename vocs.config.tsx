@@ -118,6 +118,16 @@ export default defineConfig({
 				},
 			],
 		},
+		{
+			text: 'Protocol',
+			collapsed: false,
+			items: [
+				{
+					text: 'Concero V2 Architecture',
+					link: '/concero-v2',
+				},
+			],
+		},
 		// {
 		// 	text: 'Getting Started',
 		// 	link: '/getting-started',

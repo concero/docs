@@ -1,0 +1,168 @@
+---
+title: Concero V2 Architecture
+description: Technical overview of Concero V2, a delivery-focused cross-chain interoperability protocol capable of facilitating any-to-any network communication with customizable validation.
+---
+
+# Concero V2 Architecture
+
+Concero V2 is a cross-chain interoperability protocol designed to facilitate secure any-to-any network communication while maintaining high security standards and transaction speed.
+
+## Introduction
+
+### Concero V1 Foundation
+
+Concero V1 established a fully decentralized cross-chain bridging solution built on top of [Chainlink CCIP](https://docs.chain.link/ccip). It addressed a key challenge in the interoperability space: achieving high security and decentralization without compromising on transaction speed.
+
+By leveraging Chainlink CCIP as a secure and [truly decentralized](https://blog.chain.link/five-levels-cross-chain-security/) settlement layer combined with the decentralized compute capabilities of [Chainlink Functions](https://docs.chain.link/chainlink-functions), Concero V1 achieved 25-second transfer speeds at competitive costs without security compromises.
+
+### The Evolution to V2
+
+Concero V2 builds upon V1's foundation while introducing significant improvements:
+
+- **Unlimited network reach**: Leveraging relayer nodes economically secured by Symbiotic restaking and coupled with Chainlink Functions
+- **Modularity**: Greater control over modules required to confirm cross-chain messages
+- **Unlimited transmitted data size**: Up to 1.875 MB per message (on EVM chains)
+
+| Protocol   | Data limits per message |
+| ---------- | ----------------------- |
+| Concero V1 | ~650 bytes              |
+| Concero V2 | 1.875 MB                |
+
+:::note
+The 1.875 MB limit applies to EVM chains, based on their theoretical calldata size limit with a 30M block gas limit (Ethereum network) and a non-zero calldata byte cost of 16 gas units. Non-EVM chains may have different limits.
+:::
+
+## Security Pillars
+
+Concero V2 is built on two essential security pillars:
+
+### Economic Security
+
+Relayer nodes are economically secured through:
+- Integration with [Symbiotic](https://docs.symbiotic.fi) restaking protocol
+- Reward systems for genuine operations
+- Penalty mechanisms for dishonest behavior
+
+### Cryptographic Security
+
+Objective proof mechanisms ensure the protocol works correctly even without economic incentives:
+- Verifiable compute through Chainlink Functions provides trust-minimized source of truth
+- Cryptographic verification prevents value loss or incorrect message propagation even if all relayer nodes are compromised
+
+## Architecture Components
+
+![Concero V2 Architecture](/images/concero-v2-architecture.png)
+
+The Concero V2 architecture focuses on message delivery rather than validation. Any validation module can be permissionlessly added in the future, enabling developers to choose a custom validator for each individual message. Currently, Chainlink Functions is used as the default and only validation module.
+
+The Concero V2 infrastructure consists of several key components:
+
+### Router Contracts
+
+Deployed on every supported network, router contracts serve as the entry point for users interacting with the protocol. Their core functions include:
+
+- **Receiving incoming messages**: Capturing user messages and emitting events for relayers
+- Verifying incoming messages: Using validation reports from the current validation module (Chainlink Functions)
+- **Releasing outbound messages**: Delivering validated messages to their destination
+
+Router contracts also handle administrative functions like:
+- Registering and de-registering operators
+- Managing reward distribution
+- Tracking delegated stake for each operator
+
+### Chainlink Functions
+
+Chainlink Functions serves as a trust-minimized verifiable compute layer that enables essential operations:
+
+- Validates transaction presence on source chains
+- Computation runs on the Base network across four nodes in the Chainlink Functions Decentralized Oracle Network (DON)
+- Currently serves as the default and only validation module
+- Generates cryptographically signed validation reports that confirm transaction validity
+
+![Chainlink Functions Validation Flow](/images/concero-v2-clf-report.png)
+
+#### Verifiable Reports
+
+The security of these reports is ensured through:
+- Signature verification from at least 3 out of 4 DON nodes
+- Consensus on responses from multiple randomized JSON RPC providers
+- Tamper-proof data validation through signature matching with the data hash
+
+### Symbiotic Contracts
+
+As a restaking protocol, Symbiotic provides economic security by:
+- Ensuring genuine behavior of node operators
+- Penalizing incorrect claims through slashing mechanisms
+- Minimizing Ethereum state changes for cost efficiency
+- State changes occur only during slashable events
+
+### Operator Rewards and Slashing
+
+#### Rewards
+Rewards are collected on router contracts and distributed to relayers
+
+#### Slashing
+Slashing penalties apply to relayers in specific scenarios:
+- Message fulfillment failures within designated time slots
+- The challenge period for disputing transactions is approximately 10-20 seconds
+
+### Relayer Nodes
+
+Relayers in the Concero V2 ecosystem perform two essential jobs:
+- Requesting validation: Capturing events from router contracts and triggering validation via ConceroVerifier on validation-enabled chains
+- Message delivery: Listening for validation reports, decoding and relaying them to destination chains
+
+### Integration with Existing Protocols
+
+Concero V2 supports integration with existing interoperability protocols:
+- Optional confirmation modules can work alongside the mandatory components
+- Developers can adjust transaction security based on specific use cases
+- Additional protocols increase security at the cost of longer completion times
+
+## Transaction Flow
+
+1. User sends a message to the source chain router contract
+- The relayer captures the emitted event from the source chain
+- The relayer forwards the message to the Master Chain (Base) to request validation through Chainlink Functions
+- Chainlink Functions returns the validation report to the CLF chain
+- The relayer captures, decodes, and forwards the report with transaction data to the destination chain
+6. Destination router contract verifies the report and releases the transaction
+
+## Fee Structure
+
+### Message Fees
+
+| Fee Type              | Amount       |
+| --------------------- | ------------ |
+| Concero Fee           | 1 cent USD   |
+| Chainlink Functions   | ~5 cent USD  |
+| Relayer Fee           | TBA          |
+
+- **Concero Fee**: Standard fee applied to all messages
+- **Chainlink Functions Fee**: Cost for the default verification module
+:::note
+(CLF callback cost heavilydepends on Master Chain gas prices, in our case Arbitrum)
+:::
+- **Relayer Fee**: Covers two key operations:
+  - Relaying from source chain to master chain verifier
+  - Relaying validation report to destination chain router
+
+## Risk Mitigation
+
+### Relayer Node Risks
+
+Incorrect messages are mitigated through:
+- Economic penalties via Symbiotic stake slashing
+- Verification requiring validation from Chainlink Functions
+
+### Chainlink Functions DON Node Risks
+
+In the unlikely event of DON node compromise:
+- Future implementations will allow additional validation modules to be enabled
+- Validation requirements prevent message release if verification fails
+
+### Denial of Service Protection
+
+To minimize service interruption risks:
+- Economic incentives ensure sufficient node operator participation
+- The protocol balances rewards between operators and users
