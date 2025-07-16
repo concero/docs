@@ -5,9 +5,9 @@ description: Technical overview of Concero V2, a delivery-focused cross-chain in
 
 # Concero V2 Architecture
 
-Concero V2 is a cross-chain interoperability protocol designed to facilitate secure any-to-any network communication while maintaining high security standards and transaction speed.
-
 ## Introduction
+
+Concero V2 is a cross-chain interoperability protocol designed to facilitate secure any-to-any network communication while maintaining high security standards, competitive transaction speed and costs and  unprecedented scalability across EVM chains.
 
 ### Concero V1 Foundation
 
@@ -58,7 +58,7 @@ Objective proof mechanisms ensure the protocol works correctly even without econ
 
 The Concero V2 architecture focuses on message delivery rather than validation. Any validation module can be permissionlessly added in the future, enabling developers to choose a custom validator for each individual message. Currently, Chainlink Functions is used as the default and only validation module.
 
-The Concero V2 infrastructure consists of several key components:
+The infrastructure of Concero V2 consists of several key components:
 
 ### Router Contracts
 
@@ -74,10 +74,10 @@ Router contracts also handle administrative functions like:
 
 ### Concero Verifier
 
-The Concero Verifier is a central component of the architecture that:
+- Serves as the first verifying module in the protocol using Chainlink Functions
+- Produces reports confirming the validity of transactions.
 - Collects operator deposits
 - Manages registration and de-registration of operators
-- Serves as the first verifying module in the protocol using Chainlink Functions on Arbitrum
 - Collects fees for relayers requesting validation reports
 - Rewards relayers upon successful report requests
 
@@ -107,33 +107,26 @@ As a restaking protocol, Symbiotic provides economic security by:
 - Minimizing Ethereum state changes for cost efficiency
 - State changes occur only during slashable events
 
-### Operator Rewards and Slashing
-
-#### Rewards
-Rewards are collected on both verifier and router contracts and distributed to relayers for two distinct operations:
-- Report request rewards from the verifier contract
-- Message delivery rewards from router contracts
-
-#### Slashing
-Slashing penalties apply to relayers only in case of failing to deliver a message within a designated time slot:
-- Each relayer has a 10-second window to submit the message, after which they are considered downtiming and the turn is passed to another relayer.
-
-:::info
-The cryptographic security of Concero V2 ensures that it is **impossible** for the relayer to submit an incorrect message.
-:::
-
 ### Relayer Nodes
 
 Relayers in the Concero V2 ecosystem perform two essential jobs:
 - Requesting validation: Capturing events from router contracts and triggering validation via ConceroVerifier on validation-enabled chains
 - Message delivery: Listening for validation reports, decoding and relaying them to destination chains
 
-### Integration with Existing Protocols
+## Operator Rewards and Slashing
 
-Concero V2 supports integration with existing interoperability protocols:
-- Optional confirmation modules can work alongside the mandatory components
-- Developers can adjust transaction security based on specific use cases
-- Additional protocols increase security at the cost of longer completion times
+### Rewards
+Rewards are collected on both verifier and router contracts and distributed to relayers for two distinct operations:
+- Report request rewards from the verifier contract
+- Message delivery rewards from router contracts
+
+### Slashing
+Slashing penalties apply to relayers only in case of failing to deliver a message within a designated time slot:
+- Each relayer has a 10-second window to submit the message, after which they are considered downtiming and the turn is passed to another relayer.
+
+:::info
+The cryptographic security of Concero V2 ensures that it is **impossible** for the relayer to submit an incorrect message.
+:::
 
 ## Transaction Flow
 
@@ -145,8 +138,6 @@ Concero V2 supports integration with existing interoperability protocols:
 
 ## Fee Structure
 
-### Message Fees
-
 | Fee Type                    | Amount       |
 | --------------------------- | ------------ |
 | Concero                     | 1 cent USD   |
@@ -155,10 +146,8 @@ Concero V2 supports integration with existing interoperability protocols:
 | Relayer Delivery            | TBD          |
 
 - **Concero Fee**: Standard fee applied to all messages
-- **Chainlink Functions Fee**: Cost for the default verification module
-:::note
-(CLF callback cost heavily depends on Master Chain gas prices, in our case Arbitrum)
-:::
+- **Chainlink Functions Fee**: Cost for the default verification module *(mostly depends on Master Chain gas prices)*
+
 - **Relayer Report Request Fee**: Fixed fee paid to relayers for requesting validation reports from the Concero Verifier; upon successful report request, the relayer gets their deposit back for this request and earns this reward
 - **Relayer Delivery Fee**: Fixed fee paid to relayers for delivering the validation report to the destination chain; the relayer receives this fee upon successful delivery
 
