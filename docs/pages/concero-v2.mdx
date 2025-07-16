@@ -19,10 +19,9 @@ By leveraging Chainlink CCIP as a secure and [truly decentralized](https://blog.
 
 Concero V2 builds upon V1's foundation while introducing significant improvements:
 
-- **Unlimited network reach**: Leveraging relayer nodes economically secured by Symbiotic restaking and coupled with Chainlink Functions
-- **Modularity**: Greater control over modules required to confirm cross-chain messages
-- **Unlimited transmitted data size**: Up to 1.875 MB per message (on EVM chains)
-- **Fast scalability**: Unprecedented ability to rapidly onboard new blockchains without deploying new nodes, making interoperability a universal utility
+- **Unlimited EVM network reach**: The protocol design allows to add EVM networks in under 20 minutes per network, requiring no interactions from relayers or any other parties.
+- **Modularity**: Greater control over modules required to validate cross-chain messages
+- **Virtually unlimited transmitted data size**: Up to 1.875 MB per message (on EVM chains)
 
 For a deeper exploration of how Concero V2 transforms blockchain interoperability into a public good through its scalable architecture, see our technical document on [Concero's Scalability](./concero-v2-scalability).
 
@@ -65,12 +64,9 @@ The infrastructure of Concero V2 consists of several key components:
 Deployed on every supported network, router contracts serve as the entry point for users interacting with the protocol. Their core functions include:
 
 - **Receiving incoming messages**: Capturing user messages and emitting events for relayers
-- **Verifying incoming messages**: Using validation reports from the current validation module (Chainlink Functions)
+- **Verifying incoming messages**: Using validation reports from ConceroVerifier
 - **Releasing outbound messages**: Delivering validated messages to their destination
 
-Router contracts also handle administrative functions like:
-- Managing reward distribution for message delivery
-- Collecting delivery fees for relayers
 
 ### Concero Verifier
 
@@ -125,7 +121,7 @@ Slashing penalties apply to relayers only in case of failing to deliver a messag
 - Each relayer has a 10-second window to submit the message, after which they are considered downtiming and the turn is passed to another relayer.
 
 :::info
-The cryptographic security of Concero V2 ensures that it is **impossible** for the relayer to submit an incorrect message.
+The cryptographic security of Concero V2 makes it **impossible** for the relayer to submit an incorrect message, assuming the integrity of the verifier.
 :::
 
 ## Transaction Flow
