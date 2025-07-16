@@ -1,0 +1,89 @@
+---
+Title: Retrieving the Message Fee
+Description: Learn how to send a cross-chain message using Concero's messaging protocol.
+---
+
+# Retrieving the Message Fee
+
+Before sending a message, you must call `getMessageFee`. If you choose to pay fees in the native token, pass the returned value as `msg.value`.
+## Function Signature
+
+```solidity
+function getMessageFee(
+        uint24 dstChainSelector,
+        bool shouldFinaliseSrc,
+        address feeToken,
+        ConceroTypes.EvmDstChainData calldata dstChainData
+) external view returns (uint256)
+```
+
+## Parameters
+
+| Parameter           | Type                           | Description                                                                                   |
+| ------------------- | ------------------------------ | --------------------------------------------------------------------------------------------- |
+| `dstChainSelector`  | `uint24`                       | Identifier for the destination chain                                                          |
+| `shouldFinaliseSrc` | `bool`                         | Whether to finalise the source chain (not yet supported; must be `false`)
+| `feeToken`          | `address`                      | Address of the token used for fee payment (native token only; use `address(0)`)               |
+| `dstChainData`      | `ConceroTypes.EvmDstChainData` | Struct containing execution parameters for the destination EVM chain                          |
+
+
+### EvmDstChainData Structure
+
+```solidity
+struct EvmDstChainData {
+    address receiver;  // The contract to receive the message on the destination chain
+    uint256 gasLimit;  // Gas limit for the message execution on the destination chain.
+}
+```
+:::info
+Make sure that you pass the same `gasLimit` to the conceroSend function in the next step.
+:::
+
+## Return Value
+
+| Type | Description |
+|------|-------------|
+| `uint256` | Fee amount (in smallest unit of the fee token, e.g. wei for native) |
+
+## Usage Example
+
+```solidity
+import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
+import {ConceroTypes} from "@concero/contracts/interfaces/ConceroTypes.sol";
+import {ConceroClient} from "./ConceroClient.sol";
+
+contract MessageSender {
+  constructor(address conceroRouter) ConceroClient(conceroRouter) {}
+
+  function sendCrossChainMessage(
+      uint24 dstChainSelector,
+      address receiver,
+      uint256 gasLimit,
+      bytes memory messageBody
+  ) external payable {
+
+      // 1. Quote message fee
+      uint256 messageFeeNative = IConceroRouter(i_conceroRouter).getMessageFee(
+        dstChainSelector,
+        false, // Source chain finality not yet supported
+        address(0), // Using native token for fees
+        dstData
+      );
+
+      // 2. Prepare destination chain data
+      ConceroTypes.EvmDstChainData memory dstData = ConceroTypes.EvmDstChainData({
+        receiver: receiver,
+        gasLimit: gasLimit
+      });
+
+      // 3. Send the cross-chain message
+      bytes32 messageId = IConceroRouter(i_conceroRouter).conceroSend{value: messageFeeNative}(
+        dstChainSelector,
+        false, // Source chain finality not yet supported
+        address(0), // Using native token for fees
+        dstData,
+        messageBody
+      );
+  }
+}
+```
