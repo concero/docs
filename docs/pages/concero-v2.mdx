@@ -65,7 +65,7 @@ The Concero V2 infrastructure consists of several key components:
 Deployed on every supported network, router contracts serve as the entry point for users interacting with the protocol. Their core functions include:
 
 - **Receiving incoming messages**: Capturing user messages and emitting events for relayers
-- Verifying incoming messages: Using validation reports from the current validation module (Chainlink Functions)
+- **Verifying incoming messages**: Using validation reports from the current validation module (Chainlink Functions)
 - **Releasing outbound messages**: Delivering validated messages to their destination
 
 Router contracts also handle administrative functions like:
@@ -107,7 +107,7 @@ As a restaking protocol, Symbiotic provides economic security by:
 - Minimizing Ethereum state changes for cost efficiency
 - State changes occur only during slashable events
 
-## Operator Rewards and Slashing
+### Operator Rewards and Slashing
 
 #### Rewards
 Rewards are collected on both verifier and router contracts and distributed to relayers for two distinct operations:
@@ -115,10 +115,12 @@ Rewards are collected on both verifier and router contracts and distributed to r
 - Message delivery rewards from router contracts
 
 #### Slashing
-Slashing penalties apply to relayers in specific scenarios:
-- Message fulfillment failures within designated time slots
-- Each relayer has a 10-second window to submit the message, after which they are considered downtiming
-- The challenge period for disputing transactions is approximately 10-20 seconds
+Slashing penalties apply to relayers only in case of failing to deliver a message within a designated time slot:
+- Each relayer has a 10-second window to submit the message, after which they are considered downtiming and the turn is passed to another relayer.
+
+:::info
+The cryptographic security of Concero V2 ensures that it is **impossible** for the relayer to submit an incorrect message.
+:::
 
 ### Relayer Nodes
 
@@ -135,12 +137,11 @@ Concero V2 supports integration with existing interoperability protocols:
 
 ## Transaction Flow
 
-1. User sends a message to the source chain router contract
-- The relayer captures the emitted event from the source chain
-- The relayer forwards the message to the Master Chain (Arbitrum) to request validation through Chainlink Functions
-- Chainlink Functions returns the validation report to the CLF chain
-- The relayer captures, decodes, and forwards the report with transaction data to the destination chain
-6. Destination router contract verifies the report and releases the transaction
+1. User sends a message to ConceroRouter on the source chain
+2. Relayer captures the message event emitted by ConceroRouter & requests its validation via ConceroVerifier on the Master Chain (Arbitrum)
+3. Chainlink Functions returns the validation report to the CLF chain, which is captured by the relayer
+4. Relayer forwards the report on the message to ConceroRouter on the destination chain
+5. Destination chain ConceroRouter verifies the report and releases the transaction to the recipient
 
 ## Fee Structure
 
@@ -162,12 +163,6 @@ Concero V2 supports integration with existing interoperability protocols:
 - **Relayer Delivery Fee**: Fixed fee paid to relayers for delivering the validation report to the destination chain; the relayer receives this fee upon successful delivery
 
 ## Risk Mitigation
-
-### Relayer Node Risks
-
-Incorrect messages are mitigated through:
-- Economic penalties via Symbiotic stake slashing
-- Verification requiring validation from Chainlink Functions
 
 ### Chainlink Functions DON Node Risks
 
