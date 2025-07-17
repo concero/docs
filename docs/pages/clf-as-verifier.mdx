@@ -1,0 +1,100 @@
+---
+title: Chainlink Functions as a Verifier
+---
+
+# Chainlink Functions as a Verifier
+
+A key component of our infrastructure is the use of Chainlink Functions (CLF) as the message verifier, responsible for verifying incoming messages. Chainlink Functions extend the Chainlink ecosystem by enabling arbitrary off-chain computation to run in a secure, isolated environment. By integrating CLF into Concero V2, we gain:
+* **Flexible message verification.** Tailor verification logic to the specific requirements of each application or blockchain network.
+* **Enhanced security.** Execute all computations within Chainlink’s trusted off-chain environment, eliminating risks of tampering or unauthorized access.
+
+
+The following sections of this documentation will dive deeper into the architecture of our CLF integration within Concero V2 and outline the main components involved.
+
+
+## Verification Process Overview
+
+Chainlink Functions (CLF) serve as our off-chain verifier for Concero V2 messages. The high-level flow is:
+
+1. **On-chain request**. An operator submits a verification request on the Master Chain, specifying the source chain ID, message ID and message hash.
+2. **CLF execution**. Chainlink spins up a secure JavaScript runtime that:
+- Connects to multiple RPC endpoints on the source chain, using a fallback provider strategy to ensure redundancy and reliability.
+- Looks for the `MessageSent` event with the given hash in the ConceroRouter contract using multiple RPC endpoints.
+- Computes the hash of the message locally and compares it to the hash provided by the operator.
+- Assembles a “report” payload if the event is found.
+3. **Off-chain report aggregation**. The report payload is broadcast to all DON nodes, each of which returns a signature. CLF enforces a threshold consensus (e.g. N-of-M signatures).
+4. **On-chain fulfillment**. Once enough signatures are collected, CLF calls back into the Master Chain verifier, delivering the signed report. The on-chain verifier:
+	- Validates the DON signatures against known public keys.
+	- Stores the report and emits a `MessageReport` event.
+5. **Forwarding to destination**. An off-chain listener picks up `MessageReport`, then relays the report to the ConceroRouter on the destination chain for final message delivery.
+
+If the event is not found or the computed hash does not match the provided one, CLF returns an error instead of a report.
+
+Inside the CLF JavaScript code, there is an internal configuration object that provides per-chain deployment and RPC metadata. This configuration is critical for the verifier logic to function correctly across multiple chains.
+
+
+
+To initiate the verification process, the operator must call the requestMessageReport function on the ConceroVerifier contract. This function triggers the CLF job by providing the necessary parameters—messageId, messageHashSum, srcChainSelector, and srcChainData—allowing Chainlink Functions to fetch and validate the message from the source chain before issuing a report.
+
+The `requestMessageReport` function can only be called by an authorized operator who has a sufficient ETH token deposit in the ConceroVerifier contract. This mechanism ensures the operator is able to cover the cost of executing Chainlink Functions and protects the system from abuse. Each time an operator invokes `requestMessageReport`, their deposit is partially consumed to pay for the CLF execution. Once the verification process is completed and the report is forwarded to the destination chain, the operator’s cost is reimbursed on the destination chain, along with an additional operator reward to compensate for their service and effort.
+
+```solidity
+function requestMessageReport(
+        bytes32 messageId,
+        bytes32 messageHashSum,
+        uint24 srcChainSelector,
+        bytes memory srcChainData
+) external onlyOperator returns (bytes32)
+```
+
+| Parameter         | Type              | Description                                                  |
+|------------------|-------------------|--------------------------------------------------------------|
+| `messageId`       | `bytes32`         | Unique identifier of the message being reported              |
+| `messageHashSum`  | `bytes32`         | Hash sum of the message payload to verify integrity          |
+| `srcChainSelector`| `uint24`          | Identifier for the source chain                              |
+| `srcChainData`    | `bytes`           | Encoded data related to the source chain's message context   |
+
+
+## Report Structure
+
+This section details the structure of the report returned by Chainlink Functions (CLF) and how it is consumed by the Concero verifier.
+
+### ClfDonReportSubmission
+This is the main structure passed from Chainlink Functions to your contract during fulfillment:
+
+| Field     | Type         | Description                                                                  |
+| --------- | ------------ | ---------------------------------------------------------------------------- |
+| `context` | `bytes32[3]` | Internal execution context used by the DON                                   |
+| `report`  | `bytes`      | ABI-encoded payload containing the `ClfReport`                               |
+| `rs`      | `bytes32[]`  | ECDSA `r` values of the DON node signatures                                  |
+| `ss`      | `bytes32[]`  | ECDSA `s` values of the DON node signatures                                  |
+| `rawVs`   | `bytes32`    | Packed `v` values of the ECDSA signatures for compact signature verification |
+
+
+### ClfReport
+This structure encapsulates the actual results returned by Chainlink Functions:
+
+| Field              | Type        | Description                                                                                       |
+| ------------------ | ----------- | ------------------------------------------------------------------------------------------------- |
+| `requestIds`       | `bytes32[]` | Request IDs (aligned by index with `results` and `errors`)                                        |
+| `results`          | `bytes[]`   | Successful results of the execution. `results[0]` is passed to `ConceroVerifier.fulfillRequest()` |
+| `errors`           | `bytes[]`   | Error payloads (if any), aligned with `requestIds`                                                |
+| `onchainMetadata`  | `bytes[]`   | ABI-encoded `ClfReportOnchainMetadata` metadata for billing and verification                      |
+| `offchainMetadata` | `bytes[]`   | Optional debugging or operational metadata from DON execution                                     |
+
+### ClfReportOnchainMetadata
+This metadata is attached to each CLF request for cost estimation, billing, and callback execution parameters:
+
+| Field                       | Type      | Description                                                                   |
+| --------------------------- | --------- | ----------------------------------------------------------------------------- |
+| `requestId`                 | `bytes32` | Unique identifier of the Chainlink Functions request                          |
+| `coordinator`               | `address` | The Coordinator contract managing the DON for this request                    |
+| `estimatedTotalCostJuels`   | `uint96`  | Estimated maximum cost in Juels (1e18 LINK units) for fulfilling this request |
+| `client`                    | `address` | Address of the client contract (typically `ConceroVerifier`)                  |
+| `subscriptionId`            | `uint64`  | ID of the Chainlink Functions billing subscription                            |
+| `callbackGasLimit`          | `uint32`  | The gas limit allocated to the callback execution on the client               |
+| `adminFee`                  | `uint72`  | Flat fee (in Juels) paid to the Router owner                                  |
+| `donFee`                    | `uint72`  | Fee distributed among DON node operators for servicing the request            |
+| `gasOverheadBeforeCallback` | `uint40`  | Estimated gas cost before the callback begins                                 |
+| `gasOverheadAfterCallback`  | `uint40`  | Estimated gas cost after the callback completes                               |
+| `timeoutTimestamp`          | `uint32`  | The Unix timestamp after which the request is eligible to time out            |

@@ -129,6 +129,9 @@ export default defineConfig({
 				{
 					text: 'Concero V2 Scalability',
 					link: '/concero-v2-scalability',
+				},{
+					text: 'Chainlink Functions as verifier',
+					link: '/clf-as-verifier',
 				},
 			],
 		},
