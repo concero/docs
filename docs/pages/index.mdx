@@ -1,18 +1,20 @@
 ---
-layout: landing
+layout: minimal
 ---
 import './styles.css'
 
 import { HomePage } from 'vocs/components'
 
 <HomePage.Root>
-  <HomePage.Tagline>Concero Docs</HomePage.Tagline>
-  <HomePage.Description>Documentation of Concero Cross-Chain infrastructure & SDK.</HomePage.Description>
+  <HomePage.Tagline>Concero Documentation</HomePage.Tagline>
+  <HomePage.Description>Learn about Concero V2, its architecture and how to integrate it into your application or chain.</HomePage.Description>
 
-
-[//]: # (<HomePage.InstallPackage name="vocs" type="init" />)
-[//]: # (  <HomePage.Description>Documentation of Concero Cross-Chain infrastructure & SDK.</HomePage.Description>)
   <HomePage.Buttons>
-    <HomePage.Button href="/get-started/send-a-message" variant="accent">Get started</HomePage.Button>
+  <HomePage.Button href="/get-started/send-a-message" variant="accent">Get started</HomePage.Button>
+  <HomePage.Button href="./concero-v2">Architecture</HomePage.Button>
+  <HomePage.Button href="get-started/supported-networks">Supported networks</HomePage.Button>
+
   </HomePage.Buttons>
+
+  <img src="/images/Hero.webp" alt="Concero Logo" />
 </HomePage.Root>
