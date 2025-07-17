@@ -7,7 +7,8 @@ Description: Learn how to send a cross-chain message using Concero's messaging p
 
 Concero allows you to send messages from one blockchain to another using the `conceroSend` function. This enables cross-chain communication for a variety of use cases such as cross-chain token transfers, governance actions, or any custom cross-chain interactions.
 
-## Function Signature
+## Concero send
+### Function Signature
 
 ```solidity
 function conceroSend(
@@ -19,7 +20,7 @@ function conceroSend(
 ) external payable returns (bytes32)
 ```
 
-## Parameters
+### Parameters
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
@@ -29,7 +30,47 @@ function conceroSend(
 | `dstChainData` | `ConceroTypes.EvmDstChainData` | Structure containing destination chain execution parameters |
 | `message` | `bytes` | The message payload to be sent to the destination chain |
 
-### EvmDstChainData Structure
+
+### Return Value
+
+| Type | Description |
+|------|-------------|
+| `bytes32` | A unique message identifier that can be used to track the message |
+
+## Retrieving the Message Fee
+
+Before sending a message, you must call `getMessageFee`. If you choose to pay fees in the native token, pass the returned value as `msg.value`.
+### Function Signature
+
+```solidity
+function getMessageFee(
+        uint24 dstChainSelector,
+        bool shouldFinaliseSrc,
+        address feeToken,
+        ConceroTypes.EvmDstChainData calldata dstChainData
+) external view returns (uint256)
+```
+
+### Parameters
+
+| Parameter           | Type                           | Description                                                                                   |
+| ------------------- | ------------------------------ | --------------------------------------------------------------------------------------------- |
+| `dstChainSelector`  | `uint24`                       | Identifier for the destination chain                                                          |
+| `shouldFinaliseSrc` | `bool`                         | Whether to finalise the source chain (not yet supported; must be `false`)
+| `feeToken`          | `address`                      | Address of the token used for fee payment (native token only; use `address(0)`)               |
+| `dstChainData`      | `ConceroTypes.EvmDstChainData` | Struct containing execution parameters for the destination EVM chain                          |
+
+:::info
+Make sure that you pass the same `gasLimit` to the conceroSend function in the next step.
+:::
+
+### Return Value
+
+| Type | Description |
+|------|-------------|
+| `uint256` | Fee amount (in smallest unit of the fee token, e.g. wei for native) |
+
+## EvmDstChainData Structure
 
 ```solidity
 struct EvmDstChainData {
@@ -40,12 +81,6 @@ struct EvmDstChainData {
 :::info
 Make sure `gasLimit` is sufficient, otherwise the message will revert with an out-of-gas error.
 :::
-
-## Return Value
-
-| Type | Description |
-|------|-------------|
-| `bytes32` | A unique message identifier that can be used to track the message |
 
 ## Usage Example
 

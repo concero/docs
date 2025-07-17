@@ -108,10 +108,6 @@ export default defineConfig({
 				// 	link: '/get-started/overview',
 				// },
 				{
-					text: 'Retrieving the Message Fee',
-					link: '/get-started/retrieving-the-message-fee',
-				},
-				{
 					text: 'Send a message',
 					link: '/get-started/send-a-message',
 				},
