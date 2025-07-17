@@ -60,13 +60,28 @@ export default defineConfig({
 	//   google: 'Manrope'
 	// },
 	topNav: [
+		// {
+		// 	text: 'V1 Whitepaper',
+		// 	link: 'https://www.concero.io/whitepaper.pdf',
+		// },
+		//
+
 		{
-			text: 'Get in touch',
-			link: 'mailto:support@concero.io',
+			text: 'Code Repositories',
+			items: [
+				{
+					text: 'V2 Messaging Contracts',
+					link: 'http://github.com/concero/messaging-contracts-v2',
+				},
+				{
+					text: 'V2 Operators',
+					link: 'http://github.com/concero/v2-operators',
+				},
+			],
 		},
 		{
-			text: 'V1 Whitepaper',
-			link: 'https://www.concero.io/whitepaper.pdf',
+			text: 'V2 Whitepaper',
+			link: 'https://concero.io/v2_whitepaper.pdf',
 		},
 	],
 	socials: [
@@ -97,8 +112,8 @@ export default defineConfig({
 					link: '/get-started/retrieving-the-message-fee',
 				},
 				{
-					text: 'Sending a message',
-					link: '/get-started/sending-a-message',
+					text: 'Send a message',
+					link: '/get-started/send-a-message',
 				},
 				{
 					text: 'Receive a message',
@@ -132,6 +147,10 @@ export default defineConfig({
 				},{
 					text: 'Chainlink Functions as verifier',
 					link: '/clf-as-verifier',
+				},
+				{
+					text: 'Relayers',
+					link: '/relayers',
 				},
 			],
 		},
