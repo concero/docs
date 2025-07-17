@@ -148,6 +148,10 @@ export default defineConfig({
 					text: 'Relayers',
 					link: '/relayers',
 				},
+				{
+					text: 'Deployment Pipeline',
+					link: '/deployment-pipeline',
+				}
 			],
 		},
 		// {

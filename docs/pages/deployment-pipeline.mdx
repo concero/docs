@@ -1,0 +1,89 @@
+---
+
+title: Infrastructure Deployment Pipeline
+description: Step-by-step guide describing how Concero deploys infrastructure to a new network.
+
+---
+
+# Infrastructure Deployment Pipeline
+
+This page outlines the process followed by the Concero Team to deploy infrastructure on a new network. The pipeline ensures seamless integration of a new chain into the Concero ecosystem, including network configuration, contract deployment, and off-chain synchronization.
+
+The deployment process consists of the following sequential steps:
+
+---
+
+### 1. Chain Provides Gas Funding
+
+The target blockchain supplies initial gas funds to the Concero deployer and operator addresses. This enables them to execute transactions on the new network.
+
+---
+
+### 2. Registering the Network in [`@concero/v2-networks`](https://github.com/concero/v2-networks)
+
+The new blockchain network must be registered in the public GitHub repository [`@concero/v2-networks`](https://github.com/concero/v2-networks).
+This configuration enables Concero tooling and services to recognize and interact with the chain.
+
+> **This step can be completed by the chain team themselves.**
+> Please follow the instructions in the official guide: [Add Your Network](https://docs.concero.io/get-started/add-your-network)
+
+---
+
+### 3. Adding RPC Endpoints to [`@concero/rpcs`](https://github.com/concero/rpcs)
+
+RPC endpoints must be submitted to the [`@concero/rpcs`](https://github.com/concero/rpcs) repository so that verifier and operators can communicate with the new chain.
+
+> **Chain teams can also submit this information directly.**
+> Detailed steps are provided in the [Add Your Network](https://docs.concero.io/get-started/add-your-network) documentation.
+
+---
+
+### 4. Deployment of `PriceFeeds`
+
+The Concero Team deploys the `PriceFeeds` contract to the new chain, initializing it with the appropriate gas price parameters based on current market conditions.
+
+---
+
+### 5. Automatic Off-Chain Updater Integration
+
+The off-chain PriceFeeds updater service automatically discovers the new chain, loads the RPC endpoints and PriceFeeds deployment, and begins updating price data for the new network.
+No manual configuration is needed after contract deployment.
+
+---
+
+### 6. Deployment of `ConceroRouter`
+
+The team deploys the `ConceroRouter` contract to the new chain. During initialization:
+
+* All remote chains in the router are marked with `isChainSupported = false`
+* No cross-chain routing is yet enabled
+
+---
+
+### 7. Automatic Router Monitoring by Operator
+
+> *Operators will automatically detect and begin monitoring the newly deployed ConceroRouter.*
+
+However, cross-chain events will not yet be emitted because all remote chains are still marked as unsupported (`isChainSupported = false`).
+
+---
+
+### 8. CLF Verifier Module Update
+
+The Concero Team updates the Chainlink Functions (CLF) verifier module:
+
+* **Adding RPC endpoints** for the new network so CLF jobs can interact with it reliably
+* Registers the address of the new `ConceroRouter`
+
+> *(This process will soon be automated and fetched directly from Git.)*
+
+---
+
+### 9. Enable Cross-Chain Support
+
+Finally, the Concero Team enables full routing support by:
+
+* Setting `isChainSupported = true` on **all** remote routers for the new chain
+* Updating the **new ConceroRouter** to support all existing chains
+
+At this point, the new blockchain becomes a fully integrated part of the Concero network and can begin sending and receiving cross-chain messages.
