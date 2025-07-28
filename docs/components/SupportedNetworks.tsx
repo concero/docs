@@ -68,7 +68,7 @@ export function SupportedNetworks() {
 	const [networks, setNetworks] = useState<NetworksMap | null>(null)
 	const [loading, setLoading] = useState<boolean>(true)
 	const [error, setError] = useState<string | null>(null)
-	const [environment, setEnvironment] = useState<NetworkEnvironment>('mainnet')
+	const [environment, setEnvironment] = useState<NetworkEnvironment>('testnet')
 
 	useEffect(() => {
 		const fetchNetworks = async () => {
