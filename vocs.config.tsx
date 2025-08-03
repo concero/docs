@@ -100,7 +100,29 @@ export default defineConfig({
 	],
 	sidebar: [
 		{
-			text: 'Get Started',
+			text: 'Intro to Concero 101',
+			collapsed: false,
+			items: [
+				{
+					text: 'What is Concero?',
+					link: '/general/concero-101',
+				},
+				{
+					text: 'What Makes Concero Different?',
+					link: '/general/concero-differences',
+				},
+				{
+					text: 'Why Choose Concero?',
+					link: '/general/why-choose-concero',
+				},
+				{
+					text: 'Applications & Possibilities',
+					link: '/general/applications-possibilities',
+				}
+			],
+		},
+		{
+			text: 'Concero Integration',
 			collapsed: false,
 			items: [
 				// {
@@ -130,7 +152,7 @@ export default defineConfig({
 			],
 		},
 		{
-			text: 'Protocol',
+			text: 'Concero Technical Architecture',
 			collapsed: false,
 			items: [
 				{
