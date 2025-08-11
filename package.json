@@ -6,7 +6,7 @@
 		"dev": "vocs dev",
 		"build": "vocs build",
 		"preview": "vocs preview",
-		"format:fix": "prettier --write . --ignore-path .prettierignore"
+		"format": "prettier --write . --ignore-path .prettierignore"
 	},
 	"engines": {
 		"node": ">=22.0.0"

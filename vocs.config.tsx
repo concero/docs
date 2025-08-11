@@ -51,11 +51,6 @@ export default defineConfig({
 		},
 	},
 	rootDir: 'docs',
-	ogImageUrl: {
-		'/': '/og.png',
-		'/docs': 'https://docs.concero.io/og?logo=%logo&title=%title&description=%description',
-	},
-
 	// font: {
 	//   google: 'Manrope'
 	// },
@@ -100,80 +95,81 @@ export default defineConfig({
 	],
 	sidebar: [
 		{
-			text: 'Intro to Concero 101',
-			collapsed: false,
+			text: 'Introduction to Concero',
+			collapsed: true,
 			items: [
 				{
 					text: 'What is Concero?',
-					link: '/general/concero-101',
+					link: '/introduction/what-is-concero',
 				},
 				{
 					text: 'What Makes Concero Different?',
-					link: '/general/concero-differences',
+					link: '/introduction/concero-differences',
 				},
 				{
 					text: 'Why Choose Concero?',
-					link: '/general/why-choose-concero',
+					link: '/introduction/why-choose-concero',
 				},
 				{
 					text: 'Applications & Possibilities',
-					link: '/general/applications-possibilities',
-				}
-			],
-		},
-		{
-			text: 'Concero Integration',
-			collapsed: false,
-			items: [
-				// {
-				// 	text: 'Overview',
-				// 	link: '/get-started/overview',
-				// },
-				{
-					text: 'Send a message',
-					link: '/get-started/send-a-message',
-				},
-				{
-					text: 'Receive a message',
-					link: '/get-started/receive-a-message',
-				},
-				{
-					text: 'Add your network',
-					link: '/get-started/add-your-network',
-				},
-				{
-					text: 'Deployments',
-					link: '/get-started/deployments',
-				},
-				{
-					text: 'Supported Networks',
-					link: '/get-started/supported-networks',
+					link: '/introduction/applications-possibilities',
 				},
 			],
 		},
 		{
 			text: 'Concero Technical Architecture',
-			collapsed: false,
+			collapsed: true,
 			items: [
 				{
 					text: 'Concero V2 Architecture',
-					link: '/concero-v2',
+					link: '/technical-architecture/concero-v2',
 				},
 				{
 					text: 'Concero V2 Scalability',
-					link: '/concero-v2-scalability',
-				},{
+					link: '/technical-architecture/concero-v2-scalability',
+				},
+				{
 					text: 'Chainlink Functions as verifier',
-					link: '/clf-as-verifier',
+					link: '/technical-architecture/clf-as-verifier',
 				},
 				{
 					text: 'Relayers',
-					link: '/relayers',
+					link: '/technical-architecture/relayers',
 				},
 				{
 					text: 'Deployment Pipeline',
-					link: '/deployment-pipeline',
-				}
+					link: '/technical-architecture/deployment-pipeline',
+				},
+			],
+		},
+		{
+			text: 'Integrate Concero',
+			collapsed: false,
+			items: [
+				// {
+				// 	text: 'Overview',
+				// 	link: '/integrate-concero/overview',
+				// },
+				{
+					text: 'Send a message',
+					link: '/integrate-concero/send-a-message',
+				},
+				{
+					text: 'Receive a message',
+					link: '/integrate-concero/receive-a-message',
+				},
+				{
+					text: 'Contract deployments',
+					link: '/integrate-concero/deployments',
+				},
+				{
+					text: 'Supported networks',
+					link: '/integrate-concero/supported-networks',
+				},
+				{
+					text: 'Add your network to Concero',
+					link: '/integrate-concero/add-your-network',
+				},
 			],
 		},
 		// {

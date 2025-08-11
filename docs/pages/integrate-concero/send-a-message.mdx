@@ -1,0 +1,108 @@
+---
+Title: Send a Message
+Description: Learn how to send a cross-chain message using Concero's messaging protocol.
+---
+
+# Send a Cross-Chain Message
+
+Concero allows you to send messages from one blockchain to another using the `conceroSend` function. This enables cross-chain communication for a variety of use cases such as cross-chain token transfers, governance actions, or any custom cross-chain interactions.
+
+## Quick Start Example
+
+```solidity
+import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
+import {ConceroTypes} from "@concero/contracts/interfaces/ConceroTypes.sol";
+
+contract YourContract {
+  constructor(address conceroRouter) {
+     i_conceroRouter = conceroRouter;
+  } // Set the address of ConceroRouter
+
+  function yourFunction() external payable {
+      uint24 dstChainSelector = 11124;      // See "Supported networks" page for available chain selectors
+      address receiver = address(0x123);    // A contract or an EOA address
+      uint256 gasLimit = 100000;            // Gas limit for the destination contract execution
+      bytes memory messageBody = "Hello!";  // Any data you want to send
+
+      // 1. Prepare destination chain data
+      ConceroTypes.EvmDstChainData memory dstData = ConceroTypes.EvmDstChainData({
+        receiver: receiver, // Contract address that will receive the message
+        gasLimit: gasLimit  // Gas limit for your contract on destination chain
+      });
+
+      // 2. Calculate message fee
+      uint256 messageFeeNative = IConceroRouter(i_conceroRouter).getMessageFee(
+        dstChainSelector,   // Destination chain selector
+        false,              // IsSrcFinalityRequired: Not yet supported, leave as false
+        address(0),         // FeeToken: Use native value
+        dstData             // Destination chain data
+      );
+
+      // 3. Send the cross-chain message
+      bytes32 messageId = IConceroRouter(i_conceroRouter).conceroSend{value: messageFeeNative}(
+        dstChainSelector,   // uint24 dstChainSelector: destination chain selector
+        false,              // bool shouldFinaliseSrc: not yet supported
+        address(0),         // address feeToken: use native token
+        dstData,            // ConceroTypes.EvmDstChainData
+        messageBody         // The bytes data to send to your contract
+      );
+
+      // Use messageId to track your message if needed
+  }
+}
+
+```
+
+## ConceroSend
+
+```solidity
+function conceroSend(
+    uint24 dstChainSelector,    // Destination chain selector. See "Supported networks" page for available chain selectors
+    bool shouldFinaliseSrc,     // Must be false (not yet supported)
+    address feeToken,           // Must be address(0) for native token
+    ConceroTypes.EvmDstChainData memory dstChainData, // Receiver and gas limit
+    bytes calldata message      // Your message payload
+) external payable returns (bytes32 messageId)
+```
+
+### EvmDstChainData
+
+```solidity
+struct EvmDstChainData {
+    address receiver;  // The contract to receive the message on the destination chain
+    uint256 gasLimit;  // Gas limit for the message execution on the destination chain.
+}
+```
+
+:::info
+Make sure `gasLimit` is sufficient, otherwise the message will revert with an out-of-gas error.
+:::
+
+
+### ConceroMessageSent Event
+
+When a message is sent, a `ConceroMessageSent` event is emitted with the following parameters:
+
+```solidity
+event ConceroMessageSent(
+    bytes32 indexed messageId,
+    uint16 version,
+    bool shouldFinaliseSrc,
+    uint24 dstChainSelector,
+    bytes dstChainData,
+    address sender,
+    bytes message
+);
+```
+## Query Message Fee before sending a message
+
+Before sending a message, you must call `getMessageFee`. If you choose to pay fees in the native token, pass the returned value as `msg.value`.
+
+```solidity
+function getMessageFee(
+    uint24 dstChainSelector,
+    bool shouldFinaliseSrc,
+    address feeToken,
+    ConceroTypes.EvmDstChainData calldata dstChainData
+) external view returns (uint256 fee)
+```

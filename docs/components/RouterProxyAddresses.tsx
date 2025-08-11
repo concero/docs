@@ -54,7 +54,10 @@ export function RouterProxyAddresses({ environment = 'testnet' }: RouterProxyAdd
 		const routerProxyAddresses: RouterAddress[] = []
 
 		text.split('\n').forEach(line => {
-			if (line.includes(ROUTER_PROXY_CONFIG.VARIABLE_PREFIX) && !line.includes(ROUTER_PROXY_CONFIG.ADMIN_SUFFIX)) {
+			if (
+				line.includes(ROUTER_PROXY_CONFIG.VARIABLE_PREFIX) &&
+				!line.includes(ROUTER_PROXY_CONFIG.ADMIN_SUFFIX)
+			) {
 				const parts = line.split('=')
 				if (parts.length === 2) {
 					const key = parts[0].trim()
@@ -120,8 +123,8 @@ export function RouterProxyAddresses({ environment = 'testnet' }: RouterProxyAdd
 			<div className="error-message">
 				<p>Error loading router proxy addresses: {error}</p>
 				<p>
-					Note: If you're experiencing CORS issues, you may need to use a CORS proxy or configure your server to allow
-					cross-origin requests.
+					Note: If you're experiencing CORS issues, you may need to use a CORS proxy or configure your server
+					to allow cross-origin requests.
 				</p>
 			</div>
 		)
