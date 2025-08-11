@@ -171,6 +171,7 @@ export function RouterProxyAddresses({ environment = 'testnet' }: RouterProxyAdd
 				.router-proxy-addresses {
 					margin: 20px 0;
 					font-family: var(--vocs-font-sans);
+
 				}
 				.table-container {
 					overflow-x: auto;
@@ -182,9 +183,11 @@ export function RouterProxyAddresses({ environment = 'testnet' }: RouterProxyAdd
 					box-shadow: 0 1px 3px var(--vocs-shadow-color);
 					border-radius: 5px;
 					overflow: hidden;
+
 				}
 				.address-table thead {
 					background-color: var(--vocs-background-subtle);
+					
 				}
 				.address-table th {
 					font-weight: 300;
@@ -197,6 +200,8 @@ export function RouterProxyAddresses({ environment = 'testnet' }: RouterProxyAdd
 					padding: 12px 15px;
 					text-align: left;
 					border-bottom: 1px solid var(--vocs-border-color);
+					font-size: 14px;
+
 				}
 				.address-table tbody tr:hover {
 					background-color: var(--vocs-background-hover);
