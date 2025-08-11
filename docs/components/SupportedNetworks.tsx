@@ -114,7 +114,7 @@ export function SupportedNetworks() {
 	}, [environment])
 
 	const handleEnvironmentToggle = (isMainnet: boolean): void => {
-		setEnvironment(isMainnet ? 'mainnet' : 'testnet')
+		// setEnvironment(isMainnet ? 'mainnet' : 'testnet') // we currently only support testnet. this will be enabled in the future
 	}
 
 	if (loading) {
