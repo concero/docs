@@ -159,6 +159,10 @@ export default defineConfig({
 					link: '/integrate-concero/receive-a-message',
 				},
 				{
+					text: 'Track a message',
+					link: '/integrate-concero/track-a-message',
+				},
+				{
 					text: 'Contract deployments',
 					link: '/integrate-concero/deployments',
 				},
