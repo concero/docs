@@ -8,7 +8,8 @@
 		"preview": "vocs preview",
 		"format": "prettier --write . --ignore-path .prettierignore"
 	},
-	"engines": {
+  "packageManager": "bun",
+  "engines": {
 		"node": ">=22.0.0"
 	},
 	"dependencies": {
