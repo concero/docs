@@ -1,108 +1,179 @@
 ---
-Title: Send a Message
-Description: Learn how to send a cross-chain message using Concero's messaging protocol.
+
+title: Send a Cross-Chain Message
 ---
 
 # Send a Cross-Chain Message
 
-Concero allows you to send messages from one blockchain to another using the `conceroSend` function. This enables cross-chain communication for a variety of use cases such as cross-chain token transfers, governance actions, or any custom cross-chain interactions.
-
-## Quick Start Example
+## Quick start (Solidity)
 
 ```solidity
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.28;
+
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
-import {ConceroTypes} from "@concero/contracts/interfaces/ConceroTypes.sol";
+import {MessageCodec} from "../common/libraries/MessageCodec.sol";
 
-contract YourContract {
-  constructor(address conceroRouter) {
-     i_conceroRouter = conceroRouter;
-  } // Set the address of ConceroRouter
+contract ConceroQuickStartSender {
+    IConceroRouter internal immutable i_conceroRouter;
 
-  function yourFunction() external payable {
-      uint24 dstChainSelector = 11124;      // See "Supported networks" page for available chain selectors
-      address receiver = address(0x123);    // A contract or an EOA address
-      uint256 gasLimit = 100000;            // Gas limit for the destination contract execution
-      bytes memory messageBody = "Hello!";  // Any data you want to send
+    constructor(address conceroRouter) {
+        i_conceroRouter = IConceroRouter(conceroRouter);
+    }
 
-      // 1. Prepare destination chain data
-      ConceroTypes.EvmDstChainData memory dstData = ConceroTypes.EvmDstChainData({
-        receiver: receiver, // Contract address that will receive the message
-        gasLimit: gasLimit  // Gas limit for your contract on destination chain
-      });
+    function sendPing(
+        uint24 dstChainSelector,
+        address receiverOnDst,
+        uint32 gasLimitOnDst,
+        address relayerLib,
+        bytes calldata relayerConfig,          // can be empty
+        address[] calldata validatorLibs,
+        bytes[] calldata validatorConfigs,     // can be empty
+        string calldata text
+    ) external payable returns (bytes32 messageId) {
+        // 1) Canonical packed EVM destination data: receiver (20 bytes) + gasLimit (uint32)
+        bytes memory dstChainData =
+            MessageCodec.encodeEvmDstChainData(receiverOnDst, gasLimitOnDst);
 
-      // 2. Calculate message fee
-      uint256 messageFeeNative = IConceroRouter(i_conceroRouter).getMessageFee(
-        dstChainSelector,   // Destination chain selector
-        false,              // IsSrcFinalityRequired: Not yet supported, leave as false
-        address(0),         // FeeToken: Use native value
-        dstData             // Destination chain data
-      );
+        // 2) Build MessageRequest (fields aligned with your MessageCodec)
+        IConceroRouter.MessageRequest memory req = IConceroRouter.MessageRequest({
+            dstChainSelector: dstChainSelector,
+            dstChainData: dstChainData,
+            srcBlockConfirmations: 0,              // set if you use it
+            feeToken: address(0),                  // native fees
+            validatorLibs: validatorLibs,
+            validatorConfigs: validatorConfigs,
+            relayerLib: relayerLib,                // per-message relayer selection
+            relayerConfig: relayerConfig,
+            payload: text
+        });
 
-      // 3. Send the cross-chain message
-      bytes32 messageId = IConceroRouter(i_conceroRouter).conceroSend{value: messageFeeNative}(
-        dstChainSelector,   // uint24 dstChainSelector: destination chain selector
-        false,              // bool shouldFinaliseSrc: not yet supported
-        address(0),         // address feeToken: use native token
-        dstData,            // ConceroTypes.EvmDstChainData
-        messageBody         // The bytes data to send to your contract
-      );
-
-      // Use messageId to track your message if needed
-  }
+        // 3) Quote total fee (relayer + validators), then send
+        uint256 fee = i_conceroRouter.getMessageFee(req);
+        messageId = i_conceroRouter.conceroSend{value: fee}(req);
+    }
 }
 
 ```
 
-## ConceroSend
+---
+
+## `MessageRequest`
+
+Your request is the single source of truth for pricing, receipt packing, relayer selection, and validator setup.
+
+At minimum (based on current packing logic) the router expects fields equivalent to:
+
+```solidity
+struct MessageRequest {
+    /// @notice Which chain the message should be delivered to.
+    /// @dev Concero uses chain selectors (not chain IDs) to route delivery.
+    uint24 dstChainSelector;
+
+    /// @notice Destination-specific execution parameters.
+    /// @dev For EVM destinations this defines:
+    ///      - who should be called on the destination (receiver)
+    ///      - how much gas to give that call (gasLimit)
+    ///      This is what makes the message actually executable on the target chain.
+    bytes dstChainData;
+
+    /// @notice How many source-chain block confirmations you want to wait for before the message
+    ///         is considered safe enough to deliver (reorg protection).
+    /// @dev Set based on your security needs: higher confirmations = safer, but slower delivery.
+    uint64 srcBlockConfirmations;
+
+    /// @notice Which token you pay fees in.
+    /// @dev Currently supported: native only (address(0)).
+    address feeToken;
+
+    /// @notice Which validator modules you want to use to attest/verify this message.
+    /// @dev You choose the security model per message by choosing the validator libs.
+    address[] validatorLibs;
+
+    /// @notice Configuration for each validator module.
+    /// @dev One config per validator lib (must match validatorLibs length).
+    ///      Typical examples: validator gas limits, thresholds, or other validator-specific params.
+    bytes[] validatorConfigs;
+
+    /// @notice The relayer module you want to deliver this message.
+    /// @dev This is a per-message choice. If the user selects a relayer, only that relayer
+    ///      (per its own rules) is expected/allowed to submit the delivery.
+    address relayerLib;
+
+    /// @notice Relayer-specific configuration for this message.
+    /// @dev Optional opaque bytes interpreted only by the chosen relayer implementation.
+    ///      Examples: service tier, delivery options, custom routing hints (depends on relayer).
+    bytes relayerConfig;
+
+    /// @notice The message data that will be delivered to the destination chain.
+    /// @dev This is arbitrary bytes. Concero does not impose a format here:
+    ///      - it can be raw bytes (e.g. "hello")
+    ///      - it can be an ABI-encoded struct
+    ///      - it can be a custom serialization your app understands
+    ///      The destination-side receiver decides how to interpret it.
+    bytes payload;
+}
+```
+
+## Quote the fee
+
+Call `getMessageFee(req)` before sending, then pass the returned value as `msg.value` when paying in native.
+
+```solidity
+function getMessageFee(
+    MessageRequest calldata messageRequest
+) external view returns (uint256 totalFee);
+```
+
+What’s inside:
+
+* **relayer fee** (computed by the chosen `relayerLib`)
+* **+ validator fees** (computed by validator libs)
+
+---
+
+## Send the message
 
 ```solidity
 function conceroSend(
-    uint24 dstChainSelector,    // Destination chain selector. See "Supported networks" page for available chain selectors
-    bool shouldFinaliseSrc,     // Must be false (not yet supported)
-    address feeToken,           // Must be address(0) for native token
-    ConceroTypes.EvmDstChainData memory dstChainData, // Receiver and gas limit
-    bytes calldata message      // Your message payload
-) external payable returns (bytes32 messageId)
+    MessageRequest calldata messageRequest
+) external payable returns (bytes32 messageId);
 ```
 
-### EvmDstChainData
+The router builds a packed receipt via `MessageCodec.toMessageReceiptBytes(...)` and returns `messageId = keccak256(packedReceipt)`.
 
-```solidity
-struct EvmDstChainData {
-    address receiver;  // The contract to receive the message on the destination chain
-    uint256 gasLimit;  // Gas limit for the message execution on the destination chain.
-}
-```
+---
 
-:::info
-Make sure `gasLimit` is sufficient, otherwise the message will revert with an out-of-gas error.
-:::
+## Events to index
 
+### `ConceroMessageSent`
 
-### ConceroMessageSent Event
-
-When a message is sent, a `ConceroMessageSent` event is emitted with the following parameters:
+Emitted on the source chain; relayers watch this and pick messages where `relayerLib == theirRelayerLib`.
 
 ```solidity
 event ConceroMessageSent(
     bytes32 indexed messageId,
-    uint16 version,
-    bool shouldFinaliseSrc,
-    uint24 dstChainSelector,
-    bytes dstChainData,
-    address sender,
-    bytes message
+    bytes packedMessageReceipt,
+    address[] validatorLibs,
+    address relayerLib
 );
 ```
-## Query Message Fee before sending a message
 
-Before sending a message, you must call `getMessageFee`. If you choose to pay fees in the native token, pass the returned value as `msg.value`.
+## EVM destination chain data
+
+Concero’s canonical EVM dstChainData format is:
+
+* `[0:20]  receiver (address)`
+* `[20:24] dstGasLimit (uint32)`
+
+Use:
 
 ```solidity
-function getMessageFee(
-    uint24 dstChainSelector,
-    bool shouldFinaliseSrc,
-    address feeToken,
-    ConceroTypes.EvmDstChainData calldata dstChainData
-) external view returns (uint256 fee)
+bytes memory dstChainData = MessageCodec.encodeEvmDstChainData(receiver, gasLimit);
+```
+
+And to decode (off-chain or in contracts that need it):
+
+```solidity
+(address r, uint32 gl) = MessageCodec.decodeEvmDstChainData(dstChainData);
 ```
