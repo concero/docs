@@ -102,18 +102,18 @@ export default defineConfig({
 					text: 'What is Concero?',
 					link: '/introduction/what-is-concero',
 				},
-				{
-					text: 'What Makes Concero Different?',
-					link: '/introduction/concero-differences',
-				},
-				{
-					text: 'Why Choose Concero?',
-					link: '/introduction/why-choose-concero',
-				},
-				{
-					text: 'Applications & Possibilities',
-					link: '/introduction/applications-possibilities',
-				},
+				// {
+				// 	text: 'What Makes Concero Different?',
+				// 	link: '/introduction/concero-differences',
+				// },
+				// {
+				// 	text: 'Why Choose Concero?',
+				// 	link: '/introduction/why-choose-concero',
+				// },
+				// {
+				// 	text: 'Applications & Possibilities',
+				// 	link: '/introduction/applications-possibilities',
+				// },
 			],
 		},
 		{
@@ -124,10 +124,10 @@ export default defineConfig({
 					text: 'Concero V2 Architecture',
 					link: '/technical-architecture/concero-v2',
 				},
-				{
-					text: 'Concero V2 Scalability',
-					link: '/technical-architecture/concero-v2-scalability',
-				},
+				// {
+				// 	text: 'Concero V2 Scalability',
+				// 	link: '/technical-architecture/concero-v2-scalability',
+				// },
 				{
 					text: 'Chainlink CRE as Verifier',
 					link: '/technical-architecture/cre-as-verifier',
@@ -136,10 +136,10 @@ export default defineConfig({
 					text: 'Relayers',
 					link: '/technical-architecture/relayers',
 				},
-				{
-					text: 'Deployment Pipeline',
-					link: '/technical-architecture/deployment-pipeline',
-				},
+				// {
+				// 	text: 'Deployment Pipeline',
+				// 	link: '/technical-architecture/deployment-pipeline',
+				// },
 			],
 		},
 		{
@@ -178,10 +178,10 @@ export default defineConfig({
 					text: 'Supported networks',
 					link: '/integrate-concero/supported-networks',
 				},
-				{
-					text: 'Add your network to Concero',
-					link: '/integrate-concero/add-your-network',
-				},
+				// {
+				// 	text: 'Add your network to Concero',
+				// 	link: '/integrate-concero/add-your-network',
+				// },
 			],
 		},
 		// {
