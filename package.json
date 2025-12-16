@@ -8,11 +8,13 @@
 		"preview": "vocs preview",
 		"format": "prettier --write . --ignore-path .prettierignore"
 	},
-  "packageManager": "bun",
-  "engines": {
+	"packageManager": "bun",
+	"engines": {
 		"node": ">=22.0.0"
 	},
 	"dependencies": {
+		"baseline-browser-mapping": "^2.9.7",
+		"caniuse-lite": "^1.0.30001760",
 		"react": "latest",
 		"react-dom": "latest",
 		"vocs": "1.0.13"
