@@ -75,32 +75,31 @@ export function SupportedNetworks() {
 			try {
 				setLoading(true)
 
-				const networkUrl =
-					environment === 'mainnet'
-						? `${GITHUB_REPOSITORIES.V2_NETWORKS.NETWORKS_URL}/mainnet.json`
-						: `${GITHUB_REPOSITORIES.V2_NETWORKS.NETWORKS_URL}/testnet.json`
+				const networkUrl = GITHUB_REPOSITORIES.CONCERO_NETWORKS
 
-				const response = await fetch(networkUrl, {
-					headers: {
-						Accept: 'application/json',
-					},
-					cache: 'no-cache',
-				})
+				const response = await fetch(networkUrl)
 
 				if (!response.ok) {
 					throw new Error(`Failed to fetch networks: ${response.status} ${response.statusText}`)
 				}
 
-				const text = await response.text()
-				let data: NetworksMap
+				const networksConfig = await response.json()
 
-				try {
-					data = JSON.parse(text) as NetworksMap
-				} catch (parseError) {
-					throw new Error(`Failed to parse JSON response: ${text.substring(0, 100)}...`)
+				const networks = {}
+				const isTestnet = environment === 'testnet'
+
+				for (const network in networksConfig) {
+					if (
+						networksConfig[network].isTestnet !== isTestnet ||
+						!networksConfig[network].deployments.router
+					) {
+						continue
+					}
+
+					networks[network] = networksConfig[network]
 				}
 
-				setNetworks(data)
+				setNetworks(networks)
 				setError(null)
 			} catch (err) {
 				console.error('Network fetch error:', err)
@@ -114,7 +113,7 @@ export function SupportedNetworks() {
 	}, [environment])
 
 	const handleEnvironmentToggle = (isMainnet: boolean): void => {
-		// setEnvironment(isMainnet ? 'mainnet' : 'testnet') // we currently only support testnet. this will be enabled in the future
+		setEnvironment(isMainnet ? 'mainnet' : 'testnet')
 	}
 
 	if (loading) {

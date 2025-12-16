@@ -129,8 +129,8 @@ export default defineConfig({
 					link: '/technical-architecture/concero-v2-scalability',
 				},
 				{
-					text: 'Chainlink Functions as Verifier',
-					link: '/technical-architecture/clf-as-verifier',
+					text: 'Chainlink CRE as Verifier',
+					link: '/technical-architecture/cre-as-verifier',
 				},
 				{
 					text: 'Relayers',
@@ -163,8 +163,16 @@ export default defineConfig({
 					link: '/integrate-concero/track-a-message',
 				},
 				{
-					text: 'Contract deployments',
-					link: '/integrate-concero/deployments',
+					text: 'Router deployments',
+					link: '/integrate-concero/router-deployments',
+				},
+				{
+					text: 'Relayer deployments',
+					link: '/integrate-concero/relayer-deployments',
+				},
+				{
+					text: 'Validator deployments',
+					link: '/integrate-concero/validator-deployments',
 				},
 				{
 					text: 'Supported networks',
