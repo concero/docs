@@ -121,7 +121,7 @@ export default defineConfig({
 			collapsed: true,
 			items: [
 				{
-					text: 'Concero V2 Architecture',
+					text: 'Concero Motherboard Architecture',
 					link: '/technical-architecture/concero-v2',
 				},
 				// {
