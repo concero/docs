@@ -1,172 +1,65 @@
 ---
 title: Concero V2 Architecture
-description: Technical overview of Concero V2, a delivery-focused cross-chain interoperability protocol capable of facilitating any-to-any network communication with customizable validation.
+description: Technical overview of Concero V2, an open messaging protocol with customizable security and permissionless validation and delivery.
 ---
 
 # Concero V2 Architecture
 
 ## Introduction
 
-Concero V2 is a cross-chain interoperability protocol designed to facilitate secure any-to-any network communication while maintaining high security standards, competitive transaction speed and costs and  unprecedented scalability across EVM chains.
+Concero V2 is an open, modular messaging protocol enabling secure and scalable any-to-any network communication across EVM-compatible blockchains. It allows **any participant to act as a message relayer or validator**, providing a permissionless foundation for cross-chain interoperability.
 
-### Concero V1 Foundation
+Concero V2 moves beyond fixed infrastructure and introduces **application-defined trust models**, letting developers select the exact validation logic that matches their use case.
 
-Concero V1 established a fully decentralized cross-chain bridging solution built on top of [Chainlink CCIP](https://docs.chain.link/ccip). It addressed a key challenge in the interoperability space: achieving high security and decentralization without compromising on transaction speed.
+## Key Shifts in V2
 
-By leveraging Chainlink CCIP as a secure and [truly decentralized](https://blog.chain.link/five-levels-cross-chain-security/) settlement layer combined with the decentralized compute capabilities of [Chainlink Functions](https://docs.chain.link/chainlink-functions), Concero V1 achieved 25-second transfer speeds at competitive costs without security compromises.
+Concero V2 represents a paradigm shift from pre-configured bridging infrastructure to a **flexible, public messaging layer**:
 
-### The Evolution to V2
+- **Permissionless architecture**: Anyone can run a relayer, contribute validation, or build custom delivery logic.
+- **Pluggable security stack**: Applications choose how strict or lightweight their security needs to be.
+- **Decentralized RPC sourcing**: Validation can be performed using multiple independent RPC endpoints.
+- **No centralized routing**: Messages are routed and validated by open actors, not hardcoded components.
 
-Concero V2 builds upon V1's foundation while introducing significant improvements:
+## Message Lifecycle in V2
 
-- **Unlimited EVM network reach**: The protocol design allows to add EVM networks in under 20 minutes per network, requiring no interactions from relayers or any other parties.
-- **Modularity**: Greater control over modules required to validate cross-chain messages
-- **Virtually unlimited transmitted data size**: Up to 1.875 MB per message (on EVM chains)
+1. **Message creation**
+A message is emitted by a Concero-integrated smart contract on the source chain. The message includes metadata defining the required validation logic and delivery strategy.
 
-For a deeper exploration of how Concero V2 transforms blockchain interoperability into a public good through its scalable architecture, see our technical document on [Concero's Scalability](./concero-v2-scalability).
+2. **Relayer engagement**
+A relayer — optionally specified by the message sender — picks up the message from the source chain. This relayer acts as a delivery orchestrator but remains untrusted, since all validation is subject to verification on-chain.
 
-| Protocol   | Data limits per message |
-| ---------- | ----------------------- |
-| Concero V1 | ~650 bytes              |
-| Concero V2 | 1.875 MB                |
+3. **Off-chain validation orchestration**
+The relayer executes the specified *Validation Stack* **off-chain**, which may include:
+- Waiting for the required number of block confirmations or finality
+- Querying multiple RPC endpoints to verify chain state consistency
+- Invoking validator libraries or services to produce cryptographic proofs or attestations
 
-:::note
-The 1.875 MB limit applies to EVM chains, based on their theoretical calldata size limit with a 30M block gas limit (Ethereum network) and a non-zero calldata byte cost of 16 gas units. Non-EVM chains may have different limits.
-:::
+The relayer collects the necessary off-chain validation artifacts according to the rules defined by the application.
 
-## Security Pillars
+4. **Message delivery with proofs**
+Once the validation rules are satisfied, the relayer packages the message along with its corresponding proofs and submits them to the destination chain’s **Concero Router**. The router contract performs **on-chain verification** of the proofs, ensuring the message is authentic and valid.
 
-Concero V2 is built on two essential security pillars:
-
-### Economic Security
-
-Relayer nodes are economically secured through:
-- Integration with [Symbiotic](https://docs.symbiotic.fi) restaking protocol
-- Reward systems for genuine operations
-- Penalty mechanisms for dishonest behavior
-
-### Cryptographic Security
-
-Objective proof mechanisms ensure the protocol works correctly even without economic incentives:
-- Verifiable compute through Chainlink Functions provides trust-minimized source of truth
-- Cryptographic verification prevents value loss or incorrect message propagation even if all relayer nodes are compromised
-
-## Architecture Components
-
-![Concero V2 Architecture](/images/concero-v2-architecture.png)
-
-The Concero V2 architecture focuses on message delivery rather than validation. Any validation module can be permissionlessly added in the future, enabling developers to choose a custom validator for each individual message. Currently, Chainlink Functions is used as the default and only validation module.
-
-The infrastructure of Concero V2 consists of several key components:
-
-### Router Contracts
-
-Deployed on every supported network, router contracts serve as the entry point for users interacting with the protocol. Their core functions include:
-
-- **Receiving incoming messages**: Capturing user messages and emitting events for relayers
-- **Verifying incoming messages**: Using validation reports from ConceroVerifier
-- **Releasing outbound messages**: Delivering validated messages to their destination
+5. **Execution**
+If the proofs are valid and meet the required security policy, the message is accepted and executed by the target application.
 
 
-### Concero Verifier
+## Modular Components
 
-- Serves as the first verifying module in the protocol using Chainlink Functions
-- Produces reports confirming the validity of transactions.
-- Collects operator deposits
-- Manages registration and de-registration of operators
-- Collects fees for relayers requesting validation reports
-- Rewards relayers upon successful report requests
+Concero V2 is composed of decoupled, reusable modules:
 
-### Chainlink Functions
+- **Concero Router** — Entry point for incoming validated messages.
+- **Validator Libraries** — Modular validation logic that can be extended per application.
+- **Relayers** — Stateless agents that fetch, prove, and deliver messages.
 
-Chainlink Functions serves as a trust-minimized verifiable compute layer that enables essential operations:
+Each module can evolve independently, and developers may substitute custom logic where needed.
 
-- Validates transaction presence on source chains
-- Computation runs on the Arbitrum network across four nodes in the Chainlink Functions Decentralized Oracle Network (DON)
-- Currently serves as the default and only validation module
-- Generates cryptographically signed validation reports that confirm transaction validity
+## Trust Flexibility = Broader Use Cases
 
-![Chainlink Functions Validation Flow](/images/concero-v2-clf-report.png)
+The modularity and openness of Concero V2 enable diverse use cases:
 
-#### Verifiable Reports
+- **DeFi protocols** enforcing strong finality with light client proofs
+- **Games** favoring low-latency, optimistic delivery
+- **Governance bridges** requiring multi-source agreement
+- **DAOs** using bonded relayers or slashable actors
 
-The security of these reports is ensured through:
-- Signature verification from at least 3 out of 4 DON nodes
-- Consensus on responses from multiple randomized JSON RPC providers
-- Tamper-proof data validation through signature matching with the data hash
-
-### Symbiotic Contracts
-
-As a restaking protocol, Symbiotic provides economic security by:
-- Ensuring genuine behavior of node operators
-- Penalizing incorrect claims through slashing mechanisms
-- Minimizing Ethereum state changes for cost efficiency
-- State changes occur only during slashable events
-
-### Relayer Nodes
-
-Relayers in the Concero V2 ecosystem perform two essential jobs:
-- Requesting validation: Capturing events from router contracts and triggering validation via ConceroVerifier on validation-enabled chains
-- Message delivery: Listening for validation reports, decoding and relaying them to destination chains
-
-## Operator Rewards and Slashing
-
-### Rewards
-Rewards are collected on both verifier and router contracts and distributed to relayers for two distinct operations:
-- Report request rewards from the verifier contract
-- Message delivery rewards from router contracts
-
-### Slashing
-Slashing penalties apply to relayers only in case of failing to deliver a message within a designated time slot:
-- Each relayer has a 10-second window to submit the message, after which they are considered downtiming and the turn is passed to another relayer.
-
-:::info
-The cryptographic security of Concero V2 makes it **impossible** for the relayer to submit an incorrect message, assuming the integrity of the verifier.
-:::
-
-## Transaction Flow
-
-1. User sends a message to ConceroRouter on the source chain
-2. Relayer captures the message event emitted by ConceroRouter & requests its validation via ConceroVerifier on the Master Chain (Arbitrum)
-3. Chainlink Functions returns the validation report to the CLF chain, which is captured by the relayer
-4. Relayer forwards the report on the message to ConceroRouter on the destination chain
-5. Destination chain ConceroRouter verifies the report and releases the transaction to the recipient
-
-## Fee Structure
-
-| Fee Type                    | Amount       |
-| --------------------------- | ------------ |
-| Concero                     | 1 cent USD   |
-| Chainlink Functions         | ~5 cent USD  |
-| Relayer Report Request      | TBD          |
-| Relayer Delivery            | TBD          |
-
-- **Concero Fee**: Standard fee applied to all messages
-- **Chainlink Functions Fee**: Cost for the default verification module *(mostly depends on Master Chain gas prices)*
-
-- **Relayer Report Request Fee**: Fixed fee paid to relayers for requesting validation reports from the Concero Verifier; upon successful report request, the relayer gets their deposit back for this request and earns this reward
-- **Relayer Delivery Fee**: Fixed fee paid to relayers for delivering the validation report to the destination chain; the relayer receives this fee upon successful delivery
-
-## Risk Mitigation
-
-### Chainlink Functions DON Node Risks
-
-In the unlikely event of DON node compromise:
-- Future implementations will allow additional validation modules to be enabled
-- Validation requirements prevent message release if verification fails
-
-### Centralized RPC Risks
-
-The protocol faces risks from centralized RPC providers:
-- Manipulation of data served by RPC providers
-- Downtime of RPC services can halt the system
-- To circumvent this, the Concero team is working on a decentralized RPC marketplace which is to be announced
-
-### Relayer DOS Protection
-
-To minimize service interruption risks from relayer denial of service:
-- Economic incentives ensure sufficient node operator participation
-- Slashing mechanisms for relayer downtime
-- Permissionless addition of relayers creates a decentralized network
-- 10-second window per relayer after which the next relayer can take over
-- The protocol balances rewards between operators and users
+Concero V2 is an open interoperability protocol where security is a choice, not a constraint.

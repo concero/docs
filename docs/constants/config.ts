@@ -13,6 +13,7 @@ export const GITHUB_REPOSITORIES = {
 	V2_NETWORKS: {
 		NETWORKS_URL: 'https://raw.githubusercontent.com/concero/v2-networks/refs/heads/master/networks',
 	},
+	CONCERO_NETWORKS: "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.json"
 }
 
 export const ROUTER_PROXY_CONFIG = {

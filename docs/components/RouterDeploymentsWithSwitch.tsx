@@ -3,7 +3,7 @@ import RouterProxyAddresses from './RouterProxyAddresses'
 import Switch from './Switch'
 import { NetworkEnvironment } from '../constants/config'
 
-export function RouterDeploymentsWithSwitch() {
+export function RouterDeploymentsWithSwitch({ deploymentKey }: { deploymentKey: string }) {
 	const [environment, setEnvironment] = useState<NetworkEnvironment>('testnet')
 
 	return (
@@ -17,7 +17,7 @@ export function RouterDeploymentsWithSwitch() {
 				/>
 			</div>
 
-			<RouterProxyAddresses environment={environment} />
+			<RouterProxyAddresses environment={environment} deploymentKey={deploymentKey} />
 		</div>
 	)
 }

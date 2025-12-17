@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { GITHUB_REPOSITORIES, ROUTER_PROXY_CONFIG, NetworkEnvironment } from '../constants/config'
+import { networkSimplex } from 'dagre-d3-es/src/dagre/rank/network-simplex'
 
 interface RouterAddress {
 	network: string
@@ -9,9 +10,10 @@ interface RouterAddress {
 
 interface RouterProxyAddressesProps {
 	environment?: NetworkEnvironment
+	deploymentKey: string
 }
 
-export function RouterProxyAddresses({ environment = 'testnet' }: RouterProxyAddressesProps) {
+export function RouterProxyAddresses({ environment = 'testnet', deploymentKey }: RouterProxyAddressesProps) {
 	const [addresses, setAddresses] = useState<RouterAddress[]>([])
 	const [isLoading, setIsLoading] = useState<boolean>(true)
 	const [error, setError] = useState<string | null>(null)
@@ -22,12 +24,7 @@ export function RouterProxyAddresses({ environment = 'testnet' }: RouterProxyAdd
 			try {
 				setIsLoading(true)
 
-				const deploymentFile =
-					environment === 'testnet'
-						? GITHUB_REPOSITORIES.MESSAGING_CONTRACTS_V2.FILES.TESTNET_DEPLOYMENTS
-						: GITHUB_REPOSITORIES.MESSAGING_CONTRACTS_V2.FILES.MAINNET_DEPLOYMENTS
-
-				const deploymentUrl = `${GITHUB_REPOSITORIES.MESSAGING_CONTRACTS_V2.BASE_URL}${deploymentFile}`
+				const deploymentUrl = GITHUB_REPOSITORIES.CONCERO_NETWORKS
 
 				const response = await fetch(deploymentUrl)
 
@@ -35,12 +32,16 @@ export function RouterProxyAddresses({ environment = 'testnet' }: RouterProxyAdd
 					throw new Error(`Failed to fetch: ${response.status}`)
 				}
 
-				const text = await response.text()
-				const routerProxyAddresses = parseRouterAddresses(text)
+				const networksConfig = await response.json()
+				const routerProxyAddresses = parseRouterAddresses(
+					networksConfig,
+					environment === 'testnet',
+					deploymentKey,
+				)
 
 				setAddresses(routerProxyAddresses)
 			} catch (err) {
-				console.error('Error fetching router addresses:', err)
+				console.error('Error fetching addresses:', err)
 				setError(err instanceof Error ? err.message : 'Unknown error occurred')
 			} finally {
 				setIsLoading(false)
@@ -50,27 +51,18 @@ export function RouterProxyAddresses({ environment = 'testnet' }: RouterProxyAdd
 		fetchAddresses()
 	}, [environment])
 
-	const parseRouterAddresses = (text: string): RouterAddress[] => {
-		const routerProxyAddresses: RouterAddress[] = []
+	const parseRouterAddresses = (networksConfig: any, isTestnet: boolean, deploymentKey: string): RouterAddress[] => {
+		const networks = Object.values(networksConfig).filter(
+			(i: any) => i?.isTestnet === isTestnet && i.deployments?.[deploymentKey],
+		)
 
-		text.split('\n').forEach(line => {
-			if (
-				line.includes(ROUTER_PROXY_CONFIG.VARIABLE_PREFIX) &&
-				!line.includes(ROUTER_PROXY_CONFIG.ADMIN_SUFFIX)
-			) {
-				const parts = line.split('=')
-				if (parts.length === 2) {
-					const key = parts[0].trim()
-					const address = parts[1].trim()
-					const network = key.replace(`${ROUTER_PROXY_CONFIG.VARIABLE_PREFIX}_`, '')
-					const id = `${network}-${address}`
-
-					routerProxyAddresses.push({ network, address, id })
-				}
+		return networks.map((n: any) => {
+			return {
+				network: n.name,
+				address: n.deployments[deploymentKey],
+				id: n.id,
 			}
 		})
-
-		return routerProxyAddresses
 	}
 
 	const copyToClipboard = async (text: string, id: string) => {
@@ -118,23 +110,11 @@ export function RouterProxyAddresses({ environment = 'testnet' }: RouterProxyAdd
 		return <div className="loading">Loading router proxy addresses...</div>
 	}
 
-	if (error) {
-		return (
-			<div className="error-message">
-				<p>Error loading router proxy addresses: {error}</p>
-				<p>
-					Note: If you're experiencing CORS issues, you may need to use a CORS proxy or configure your server
-					to allow cross-origin requests.
-				</p>
-			</div>
-		)
-	}
-
 	return (
 		<div className="router-proxy-addresses">
-			<h2>Router Proxy Addresses - {environment}</h2>
+			<h2>Router Addresses - {environment}</h2>
 			{addresses.length === 0 ? (
-				<p>No router proxy addresses found.</p>
+				<p>No addresses found.</p>
 			) : (
 				<div className="table-container">
 					<table className="address-table">
@@ -171,7 +151,6 @@ export function RouterProxyAddresses({ environment = 'testnet' }: RouterProxyAdd
 				.router-proxy-addresses {
 					margin: 20px 0;
 					font-family: var(--vocs-font-sans);
-
 				}
 				.table-container {
 					overflow-x: auto;
@@ -183,11 +162,9 @@ export function RouterProxyAddresses({ environment = 'testnet' }: RouterProxyAdd
 					box-shadow: 0 1px 3px var(--vocs-shadow-color);
 					border-radius: 5px;
 					overflow: hidden;
-
 				}
 				.address-table thead {
 					background-color: var(--vocs-background-subtle);
-					
 				}
 				.address-table th {
 					font-weight: 300;
@@ -201,7 +178,6 @@ export function RouterProxyAddresses({ environment = 'testnet' }: RouterProxyAdd
 					text-align: left;
 					border-bottom: 1px solid var(--vocs-border-color);
 					font-size: 14px;
-
 				}
 				.address-table tbody tr:hover {
 					background-color: var(--vocs-background-hover);

@@ -1,129 +1,49 @@
 ---
 title: Concero V2 Relayers
-description: Documentation for Concero V2 relayers, describing the technical architecture, responsibilities, and registration process
 ---
 
 # Concero V2 Relayers
 
-This documentation provides detailed information for relayers in Concero V2, explaining the technical architecture, component responsibilities, and the process for relayer registration and deregistration.
+In **Concero V2**, relayers are **opt-in and per-message**.
+
+There is **no global relayer registration** and no “join/leave” flow. A relayer becomes usable as soon as it:
+
+1. **deploys its own relayer contract** (a `relayerLib` that follows `IRelayerLib`), and
+2. users **explicitly select it** in their message request.
+
+If a user doesn’t point to your relayer, you will never see (or be responsible for) their messages.
+
+> **Current status:** at the moment there is only **one relayer in production: `concero`**.
 
 
-## Relayer Responsibilities
+## Key idea: relayer = chosen `relayerLib`
 
-Once registered, relayers in the Concero V2 network are responsible for:
+Concero’s router treats the relayer as a **contract address** (`messageRequest.relayerLib`) that defines two things:
 
-1. **Message Validation**: Requesting validation reports from Chainlink Functions for cross-chain messages.
+* **Pricing**: how much native fee is required to deliver a message (`IRelayerLib.getFee`)
+* **Authorization**: who is allowed to submit messages on behalf of that relayer (`IRelayerLib.validate`)
 
-2. **Message Delivery**: Delivering validated messages to destination chains within their allocated time window.
-
-3. **Maintaining Uptime**: Ensuring their node remains operational to avoid downtime penalties.
-
-4. **Gas & Deposit Management**: Maintaining sufficient gas on each chain & ConceroVerifier deposit to cover their operations and avoid downtime due to insufficient funds.
-
-By fulfilling these responsibilities, relayers earn rewards from:
-- Report request rewards from the verifier contract
-- Message delivery rewards from router contracts
-
-Relayers who fail to deliver messages within their designated time slot (10-second window) will face downtime penalties, however the next relayer in the relayer list will still be able to propagate the message and earn a fee as usual.
+So the network doesn’t maintain a “relayer set”. **Users pick the relayer by picking the relayer’s `relayerLib` address.**
 
 
-## Deposits, Registration & De-registration
+## Relayer responsibilities (V2)
 
-Relayers must complete a specific process to join the Concero V2 network. This process involves depositing funds, requesting registration, and passing verification checks before becoming an active relayer.
+If users select your relayer (`relayerLib`) you’re expected to:
 
-### Deposit Requirements
+1. **Monitor `ConceroMessageSent`** for your `relayerLib`
+2. **Build a destination submission**:
 
-Before registration, an relayer must deposit funds that will serve as:
-- A security deposit for participation in the network
-- Funds required for executing at least a single Chainlink Functions run
-- A stake that can be slashed in case of malicious behavior
+* gather validator proofs (`validations`) corresponding to the message’s validators
+* call `submitMessage(...)` on the destination router
+3. **Maintain uptime + gas** on destination chains (and any infra needed to source proofs)
+4. **Handle failed deliveries**:
 
-The deposit is held in the ConceroVerifier contract and is essential for the economic security of the network. Relayers must maintain sufficient deposits to cover their operations within the network.
+* resubmit if appropriate,
+* or use retry flow when a submission is marked retryable
 
-### Registration Process
+## Notes for integrators
 
-The registration process consists of the following steps:
+* The router does **not** enforce “at least N validators must pass” at the protocol level; it forwards `validationChecks` to the receiver. Your receiver contract can decide what it requires.
+* If a user selects a relayer that is down, **no one else will deliver** unless that relayer resumes (because the authorization policy is defined by the chosen `relayerLib`). So relayer choice is a real trust/availability decision.
 
-1. **Deposit Funds**: The relayer deposits the required amount of native tokens to the ConceroVerifier contract.
-
-2. **Request Registration**: The relayer invokes the `requestOperatorRegistration` function with the following parameters:
-   - `chainTypes`: Array of chain types the relayer wants to support (0 for EVMs, others to be added in the future)
-   - `operatorActions`: Array of registration actions for the relayer per chain type
-   - `operatorAddresses`: Array of relayer addresses for registration per chain type
-
-3. **Deposit Withholding**: During registration, the system will withhold a portion of the relayer's deposit using the `_witholdOperatorDeposit` function. This withheld amount is calculated based on the `OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD` constant and the current native-to-USD conversion rate.
-
-4. **Chainlink Functions Verification**: After registration is requested, Chainlink Functions performs verification checks to ensure that:
-   - The relayer has enough slashable delegated stake on Symbiotic contracts
-   - The relayer meets all technical requirements for participation
-
-5. **Registration Confirmation**: If the verification is successful, Chainlink Functions returns a successful registration report, and the relayer is marked as registered in the system.
-
-6. **Begin Operations**: Once registered, the relayer can begin operations on the Concero V2 network, participating in message validation and delivery.
-
-### De-registration Process
-
-Relayers can also request to leave the network through a de-registration process:
-
-1. **Request De-registration**: The relayer invokes the `_requestOperatorDeregistration` function.
-
-2. **Verification**: Similar to registration, ConceroVerifier ensures that the relayer can safely exit the network without compromising ongoing operations.
-
-3. **Deposit Return**: After a successful de-registration, any remaining deposits (minus withheld amounts for pending operations) are returned to the relayer.
-
-## Technical Architecture
-
-The Concero V2 relayer software consists of several specialized managers that work together to enable secure cross-chain communication. Each manager has specific responsibilities within the system:
-
-![Concero V2 Relayer Technical Architecture](/images/concero-v2-relayers.jpg)
-
-#### Block Manager Registry
-
-Serves as a central repository for network-specific BlockManagers, facilitating the creation and disposal of BlockManagers for individual networks
-
-#### Block Manager
-Fetches & reports new block ranges to subscribers for each individual network
-
-#### Block Checkpoint Manager
-
-Ensures relayer reliability by:
-- Keeping track of the latest successfully processed blocks
-- Enabling recovery from checkpoints after downtime, ensuring continuity of operations even after system interruptions
-
-#### DB Manager
-Acts as a low-level interface for data access and storage through Prisma Client
-
-#### Viem Client Manager
-Handles creation, retrieval and disposal of Viem Fallback Clients for each network
-
-#### RPC Manager
-
-Keeps an updatable list of RPC endpoints by watching `@concero/rpcs`
-
-#### Network Manager
-
-Oversees supported networks by watching `@concero/v2-networks`. Enables dynamic addition of networks without any operator intervention.
-
-#### TX Manager
-
-Serves as the central transaction coordination layer by acting as the main entry point for transaction-related operations, providing a high-level interface for both reading and writing to all networks
-
-#### TX Reader
-Focuses on blockchain data retrieval by handling all log-reading operations for all networks
-
-#### TX Writer
-Handles blockchain write operations by managing write operations for all networks
-
-#### TX Monitor
-Ensures transaction reliability by ensuring transactions remain in the blockchain until finality
-
-#### Nonce Manager
-
-Optimizes transaction throughput by:
-- Managing custom nonce tracking for Viem
-- Enabling faster transaction throughput
-- Preventing nonce-related transaction failures
-
-#### Deployment Manager
-
-The Deployment Manager tracks contract deployments by keeping updatable lists of ConceroVerifier and ConceroRouter contracts, enabling new contracts immediately after a new network is added.
+---
