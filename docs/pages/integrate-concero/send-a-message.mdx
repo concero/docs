@@ -45,7 +45,7 @@ contract ConceroQuickStartSender {
             validatorConfigs: validatorConfigs,
             relayerLib: relayerLib,                // per-message relayer selection
             relayerConfig: relayerConfig,
-            payload: text
+            payload: bytes(text)
         });
 
         // 3) Quote total fee (relayer + validators), then send
