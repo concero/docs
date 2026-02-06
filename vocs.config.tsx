@@ -75,8 +75,12 @@ export default defineConfig({
 			],
 		},
 		{
-			text: 'V2 Whitepaper',
+			text: 'Concero V2 Whitepaper',
 			link: 'https://concero.io/v2_whitepaper.pdf',
+		},
+		{
+			text: 'Concero Scan',
+			link: 'https://scan.concero.io',
 		},
 	],
 	socials: [
@@ -100,29 +104,11 @@ export default defineConfig({
 			items: [
 				{
 					text: 'What is Concero?',
-					link: '/introduction/what-is-concero',
+					link: '/technical-architecture/what-is-concero',
 				},
-				// {
-				// 	text: 'What Makes Concero Different?',
-				// 	link: '/introduction/concero-differences',
-				// },
-				// {
-				// 	text: 'Why Choose Concero?',
-				// 	link: '/introduction/why-choose-concero',
-				// },
-				// {
-				// 	text: 'Applications & Possibilities',
-				// 	link: '/introduction/applications-possibilities',
-				// },
-			],
-		},
-		{
-			text: 'Concero Technical Architecture',
-			collapsed: true,
-			items: [
 				{
-					text: 'Concero Motherboard Architecture',
-					link: '/technical-architecture/concero-v2',
+					text: 'Technical Architecture',
+					link: '/technical-architecture/technical-architecture',
 				},
 				// {
 				// 	text: 'Concero V2 Scalability',
@@ -143,13 +129,17 @@ export default defineConfig({
 			],
 		},
 		{
-			text: 'Integrate Concero',
+			text: 'Integrate as a dApp',
 			collapsed: false,
 			items: [
 				// {
 				// 	text: 'Overview',
 				// 	link: '/integrate-concero/overview',
 				// },
+				{
+					text: 'Set up ConceroClient',
+					link: '/integrate-concero/set-up-conceroclient',
+				},
 				{
 					text: 'Send a message',
 					link: '/integrate-concero/send-a-message',
@@ -162,27 +152,22 @@ export default defineConfig({
 					text: 'Track a message',
 					link: '/integrate-concero/track-a-message',
 				},
-				{
-					text: 'Router deployments',
-					link: '/integrate-concero/router-deployments',
-				},
-				{
-					text: 'Relayer deployments',
-					link: '/integrate-concero/relayer-deployments',
-				},
-				{
-					text: 'Validator deployments',
-					link: '/integrate-concero/validator-deployments',
-				},
-				{
-					text: 'Supported networks',
-					link: '/integrate-concero/supported-networks',
-				},
-				// {
-				// 	text: 'Add your network to Concero',
-				// 	link: '/integrate-concero/add-your-network',
-				// },
 			],
+		},
+		{
+			text: 'Integrate as a Chain',
+			collapsed: false,
+			items: [
+				{
+					text: 'Add your network to Concero',
+					link: '/integrate-concero/add-your-network',
+				},
+			],
+		},
+
+		{
+			text: 'Deployments',
+			link: '/integrate-concero/supported-networks',
 		},
 		// {
 		// 	text: 'Getting Started',

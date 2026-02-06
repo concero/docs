@@ -15,12 +15,12 @@ Concero provides two base contracts to make this safe and consistent:
 * **`ConceroClient`**: an opinionated base that enforces a *strict consensus policy* (all required validators must approve + allowlist).
 
 
-You implement **two hooks**:
+You implement hooks depending on which base you use:
 
 
-1. `_validateMessageSubmission(...)` — your security policy (how you interpret validator results)
+1. If you inherit `ConceroClientBase`, implement `_validateMessageSubmission(...)` for your security policy.
 
-2. `_conceroReceive(messageReceipt)` — your application logic (decode the receipt and use the payload)
+2. Implement `_conceroReceive(messageReceipt)` for your application logic (decode the receipt and use the payload).
 
 
 ## What gets called on the destination chain
@@ -141,8 +141,8 @@ This example:
 
 pragma solidity ^0.8.28;
 
-import {ConceroClient} from "./ConceroClient.sol";
-import {MessageCodec} from "../common/libraries/MessageCodec.sol";
+import {ConceroClient} from "@concero/contracts/ConceroClient/ConceroClient.sol";
+import {MessageCodec} from "@concero/contracts/common/libraries/MessageCodec.sol";
 
 contract MessageReceiver is ConceroClient {
     using MessageCodec for bytes;
@@ -176,17 +176,3 @@ contract MessageReceiver is ConceroClient {
 }
 
 ```
-
-
-## Integration checklist
-
-* **Set the correct router address** in the constructor (destination chain router).
-* **Allow the relayer lib(s)** you want to trust (today typically: allow only **concero**).
-* **Choose and configure your validator policy**:
-	* if using `ConceroClient`, set:
-		* `requiredValidatorsCount`
-		* allowed validator libs
-* In `_conceroReceive`, **treat payload as untrusted input**:
-* decode carefully,
-* validate source chain selector and/or source sender if your app needs it,
-* keep gas usage predictable (payload can be large).
