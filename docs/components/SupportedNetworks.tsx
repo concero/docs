@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react'
-import Switch from './Switch'
+import { useState, useEffect, useRef } from 'react'
 import { GITHUB_REPOSITORIES } from '../constants/config'
 
 interface NetworkData {
@@ -289,12 +288,24 @@ export function SupportedNetworks() {
 	const [networks, setNetworks] = useState<NetworksMap | null>(null)
 	const [loading, setLoading] = useState<boolean>(true)
 	const [error, setError] = useState<string | null>(null)
-	const [environment, setEnvironment] = useState<NetworkEnvironment>('testnet')
+	const [environment, setEnvironment] = useState<NetworkEnvironment>('mainnet')
 	const [searchTerm, setSearchTerm] = useState('')
+	const networksCacheRef = useRef<Partial<Record<NetworkEnvironment, NetworksMap>>>({})
 
 	useEffect(() => {
+		let isActive = true
+		const controller = new AbortController()
+
 		const fetchNetworks = async () => {
 			try {
+				const cachedNetworks = networksCacheRef.current[environment]
+				if (cachedNetworks) {
+					setNetworks(cachedNetworks)
+					setError(null)
+					setLoading(false)
+					return
+				}
+
 				setLoading(true)
 
 				const baseUrl = GITHUB_REPOSITORIES.MESSAGING_CONTRACTS_V2.BASE_URL
@@ -303,7 +314,7 @@ export function SupportedNetworks() {
 						? GITHUB_REPOSITORIES.MESSAGING_CONTRACTS_V2.FILES.MAINNET_DEPLOYMENTS
 						: GITHUB_REPOSITORIES.MESSAGING_CONTRACTS_V2.FILES.TESTNET_DEPLOYMENTS
 
-				const response = await fetch(`${baseUrl}${fileName}`)
+				const response = await fetch(`${baseUrl}${fileName}`, { signal: controller.signal })
 
 				if (!response.ok) {
 					throw new Error(`Failed to fetch networks: ${response.status} ${response.statusText}`)
@@ -363,33 +374,46 @@ export function SupportedNetworks() {
 					Object.entries(networksMap).filter(([_, data]) => data.routerProxy !== '')
 				)
 
+				if (!isActive) return
+
 				setNetworks(filteredNetworks)
+				networksCacheRef.current[environment] = filteredNetworks
 				setError(null)
 			} catch (err) {
+				if (err instanceof DOMException && err.name === 'AbortError') {
+					return
+				}
 				console.error('Network fetch error:', err)
-				setError(err instanceof Error ? err.message : 'An unknown error occurred')
+				if (isActive) {
+					setError(err instanceof Error ? err.message : 'An unknown error occurred')
+				}
 			} finally {
-				setLoading(false)
+				if (isActive) {
+					setLoading(false)
+				}
 			}
 		}
 
 		fetchNetworks()
+		return () => {
+			isActive = false
+			controller.abort()
+		}
 	}, [environment])
 
-	const handleEnvironmentToggle = (isMainnet: boolean): void => {
-		setEnvironment(isMainnet ? 'mainnet' : 'testnet')
+	const handleEnvironmentSelect = (selected: NetworkEnvironment): void => {
+		setEnvironment(selected)
 	}
 
+	let content: JSX.Element
 	if (loading) {
-		return <div>Loading supported networks...</div>
-	}
-
-	if (error) {
-		return <div>Error loading networks: {error}</div>
-	}
-
-	if (!networks) {
-		return <div>No network data available.</div>
+		content = <div>Loading supported networks...</div>
+	} else if (error) {
+		content = <div>Error loading networks: {error}</div>
+	} else if (!networks) {
+		content = <div>No network data available.</div>
+	} else {
+		content = <NetworkList networks={networks} environment={environment} searchTerm={searchTerm} />
 	}
 
 	return (
@@ -404,12 +428,24 @@ export function SupportedNetworks() {
 					flexWrap: 'wrap',
 				}}
 			>
-				<Switch
-					isOn={environment === 'mainnet'}
-					onToggle={handleEnvironmentToggle}
-					offLabel="Testnet"
-					onLabel="Mainnet"
-				/>
+				<div className="networkToggle" role="group" aria-label="Network environment">
+					<button
+						type="button"
+						className={`networkToggleButton ${environment === 'mainnet' ? 'isActive' : ''}`}
+						onClick={() => handleEnvironmentSelect('mainnet')}
+						aria-pressed={environment === 'mainnet'}
+					>
+						Mainnet
+					</button>
+					<button
+						type="button"
+						className={`networkToggleButton ${environment === 'testnet' ? 'isActive' : ''}`}
+						onClick={() => handleEnvironmentSelect('testnet')}
+						aria-pressed={environment === 'testnet'}
+					>
+						Testnet
+					</button>
+				</div>
 
 				<input
 					type="text"
@@ -429,7 +465,62 @@ export function SupportedNetworks() {
 				/>
 			</div>
 
-			<NetworkList networks={networks} environment={environment} searchTerm={searchTerm} />
+			{content}
+
+			<style jsx>{`
+				.networkToggle {
+					align-items: center;
+					background: var(--vocs-color_backgroundDark);
+					border: 1px solid var(--vocs-color_tableBorder);
+					border-radius: var(--border-radius);
+					display: inline-flex;
+					flex-shrink: 0;
+					gap: 4px;
+					padding: 4px;
+					box-shadow: inset 0 1px 1px var(--vocs-shadow-color);
+				}
+
+				.networkToggleButton {
+					background: transparent;
+					border: 0;
+					border-radius: var(--border-radius);
+					color: var(--vocs-color_text);
+					cursor: pointer;
+					font-size: 13px;
+					font-weight: 600;
+					letter-spacing: 0.01em;
+					min-width: 96px;
+					padding: 6px 14px;
+					opacity: 0.8;
+					transition:
+						background-color 0.2s ease,
+						color 0.2s ease,
+						box-shadow 0.2s ease,
+						transform 0.15s ease,
+						opacity 0.2s ease;
+				}
+
+				.networkToggleButton:hover {
+					opacity: 1;
+					background: var(--vocs-color_backgroundAccentHover);
+				}
+
+				.networkToggleButton:active {
+					transform: translateY(1px);
+				}
+
+				.networkToggleButton.isActive {
+					opacity: 1;
+					background: var(--vocs-color_backgroundAccent);
+					color: var(--vocs-color_textAccent);
+					box-shadow: 0 1px 2px var(--vocs-shadow-color);
+				}
+
+				.networkToggleButton:focus-visible {
+					outline: 2px solid var(--vocs-color_textAccent);
+					outline-offset: 2px;
+				}
+			`}</style>
 		</div>
 	)
 }
