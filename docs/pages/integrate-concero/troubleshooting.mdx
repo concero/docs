@@ -1,0 +1,115 @@
+---
+title: Troubleshooting
+description: Common Concero integration failures and fixes.
+---
+
+# Troubleshooting
+
+Use this page when you encounter issues with Concero integration.
+
+## 1) `InvalidConceroRouter`
+
+**Symptoms**
+
+- Destination receive call reverts immediately.
+
+**Cause**
+
+- Receiver was deployed with wrong router address.
+
+**Fix**
+
+- Redeploy receiver with correct `conceroRouter` for that chain.
+
+## 2) `UnauthorizedRelayerLib`
+
+**Symptoms**
+
+- Destination app rejects message even though router submission exists.
+
+**Cause**
+
+- `relayerLib` used for submission is not allowlisted in app.
+
+**Fix**
+
+- Call your admin wrapper for `_setIsRelayerLibAllowed(relayerLib, true)`.
+
+## 3) `ValidatorsConsensusNotReached` or `RequiredValidatorsCountUnset`
+
+**Symptoms**
+
+- Delivery reaches app but assertion policy fails.
+
+**Cause**
+
+- Verifier checks did not satisfy app policy.
+- `requiredValidatorsCount` unset or mismatched.
+
+**Fix**
+
+- Set expected verifier count.
+- Ensure all expected verifier libs are allowlisted.
+- Ensure message uses verifier set compatible with your app policy.
+
+## 4) Fee payment failure (`InsufficientFee`)
+
+**Symptoms**
+
+- `conceroSend` reverts on source chain.
+
+**Cause**
+
+- `msg.value` lower than `getMessageFee(req)` when using native fee token.
+
+**Fix**
+
+- Quote fee right before sending and pass exact or higher native value.
+
+## 5) `InvalidValidatorConfigsCount`
+
+**Symptoms**
+
+- `conceroSend` reverts before event emission.
+
+**Cause**
+
+- `validatorConfigs.length` does not match `validatorLibs.length`.
+
+**Fix**
+
+- Provide one config for each verifier library.
+
+## 6) Message not delivered after source event
+
+**Symptoms**
+
+- `ConceroMessageSent` exists, but no destination app execution.
+
+**Cause**
+
+- Relayer module authorization or off-chain verifier/reporting issue.
+- Destination app policy rejecting checks.
+
+**Fix**
+
+- Confirm relayer submitter is authorized by selected `relayerLib`.
+- Confirm verifier module config and signer/workflow setup.
+- Confirm app allowlists and assertion policy.
+
+## 7) Retry flow usage
+
+Use router retries when submission is marked retryable:
+
+- `retryMessageSubmission(...)`: retry client call path.
+- `retryMessageSubmissionWithRevalidation(...)`: rerun verifier checks then retry.
+
+Both are callable by anyone after submission is marked retryable.
+
+## Debug checklist
+
+1. Confirm source `messageId` and destination chain selector.
+2. Confirm selected `relayerLib` and `validatorLibs` in source event.
+3. Confirm destination app allowlists.
+4. Confirm app assertion policy settings.
+5. Re-run with a minimal payload and known-good module set.

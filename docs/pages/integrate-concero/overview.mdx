@@ -1,0 +1,48 @@
+---
+title: Integration Overview
+description: Source-chain and destination-chain responsibilities in Concero V2.
+---
+
+# Integration Overview
+
+Concero V2 is a message protocol where each message defines its own delivery and verification stack.
+
+At a high level:
+
+1. Source app creates a `MessageRequest` and pays message fee.
+2. Router emits a packed message receipt.
+3. Selected relayer delivers submission to destination router.
+4. Destination router computes verifier checks.
+5. Destination app authenticates/asserts message and runs app logic.
+
+## Mental model: two enforcement layers
+
+### Layer 1: protocol execution
+
+Handled by router + selected modules:
+
+- fee quote and collection,
+- relayer authorization (`relayerLib.validate`),
+- verifier check computation (`validationChecks`).
+
+### Layer 2: application acceptance
+
+Handled by your destination client contract:
+
+- accept calls only from trusted router,
+- allow only trusted relayer libs,
+- assert verifier checks according to your policy,
+- execute app logic in `_conceroReceive`.
+
+## Source chain responsibilities
+
+- Build `MessageRequest` with the right chain selector, relayer lib, and verifier libs.
+- Encode destination execution data (`receiver + gas limit`) with `MessageCodec.encodeEvmDstChainData`.
+- Call `getMessageFee` and pass returned value to `conceroSend` when paying native.
+
+## Destination chain responsibilities
+
+- Configure `ConceroClient`/`ConceroClientBase` safely.
+- Allowlist relayer and verifier modules you trust.
+- Set assertion policy (`all required verifiers` by default in `ConceroClient`).
+- Decode and process payload in `_conceroReceive`.

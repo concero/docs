@@ -1,39 +1,48 @@
 ---
 title: Why choose Concero?
-description: The reasons why Concero is a better choice for cross-chain communication.
+description: Practical reasons to use Concero for cross-chain messaging.
 ---
 
 # Why Choose Concero?
 
-Choosing the right interoperability protocol is a critical decision for any cross-chain application. 
+Concero gives developers control over cross-chain message delivery and verification, without forcing one global trust model.
 
-Concero is engineered to be the definitive solution for developers by providing a superior foundation built on three core pillars: security, efficiency, and universal connectivity.
-
-## A Principled Approach to Security
+## 1) Security as a configurable stack
 
 ![Concero's Security Model for Message Verification](/images/concero-v2-message-verification.png)
 
-In the world of interoperability, security cannot be an afterthought, it must be the architectural foundation. 
+For each message, you choose:
 
-Concero is built on a cryptographic security model with a configurable message stack. Security guarantees depend on which relayer and verifier modules are selected for a message, and on the destination app's assertion policy.
+- one relayer module (`relayerLib`),
+- one or more verifier modules (`validatorLibs` in current interface naming),
+- destination-side assertion policy in your app contract.
 
-By eliminating single points of failure, Concero guarantees the integrity and authenticity of messages, allowing developers to build with confidence.
+This keeps security explicit and application-specific.
 
-## Seamless and Efficient Integration
+## 2) Fast integration path
 
 ![Concero's Integration Process](/images/concero-v2-time-cost.png)
 
-Concero dramatically reduces the technical and financial overhead associated with cross-chain development. 
+You can ship a minimal integration with:
 
-Our innovative verification mechanism removes the need for costly and complex light client or full node infrastructure. This enables developers to achieve cross-chain integration with minimal effort and at no additional cost.
+1. `ConceroClient` receiver on destination,
+2. `MessageRequest` builder on source,
+3. API-based tracking for operations.
 
-This allows teams to focus resources on their core product and accelerate their time to market.
+Start at [Getting Started](/integrate-concero/getting-started).
 
-## A Framework for Universal Connectivity
+## 3) Modular architecture
 
 ![Concero's Universal Connectivity](/images/concero-v2-unlimited-chains.png)
 
-By design, Concero's modular architecture supports any blockchain, which allows applications to operate beyond the constraints of a limited ecosystem.
+Relayer and verifier modules are pluggable. Apps are not tied to a single protocol-wide trust assumption.
 
-The protocol decouples message propagation from verification, creating a universal framework that can connect to any network, regardless of its underlying design. This provides immediate support for EVM-compatible chains and Layer 2 solutions, with a clear path to integrating non-EVM chains, ensuring your application is ready for the future of a multi-chain world.
+## What this means for integrators
 
+- You can keep strict assertions for high-value flows.
+- You can define lighter policies for low-risk flows.
+- You can evolve module choices over time without rewriting app business logic.
+
+:::note
+Current Concero-run relayer/verifier modules are admin-gated via allowlists/roles. Apps can choose custom modules, including permissionless implementations.
+:::

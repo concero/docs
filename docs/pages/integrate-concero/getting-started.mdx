@@ -1,0 +1,70 @@
+---
+title: Getting Started
+description: Fastest path to your first cross-chain message with Concero V2.
+---
+
+# Getting Started (15 minutes)
+
+This page is the fastest path to your first working message flow.
+
+You will complete a minimal setup in this order:
+
+1. Deploy a receiver contract that inherits `ConceroClient`.
+2. Configure trusted relayer and verifier modules.
+3. Send a message from a source chain.
+4. Verify delivery with API tracking and destination-chain logs.
+
+## Before you begin
+
+- Solidity project ready (`foundry` or `hardhat`).
+- One source chain and one destination chain from [Supported Networks](/integrate-concero/supported-networks).
+- Native gas token funded on both chains.
+- Router + module addresses copied for your target networks.
+
+:::note
+Current interface naming still uses `validatorLibs`, `validatorConfigs`, and `validationChecks`. In docs we refer to these as verifier libraries/configs/checks.
+:::
+
+## Step 1: Understand the flow
+
+Read [Integration Overview](/integrate-concero/overview) first. It explains who does what at source vs destination.
+
+## Step 2: Set up the destination receiver
+
+Follow [Set up ConceroClient](/integrate-concero/set-up-conceroclient):
+
+- inherit `ConceroClient`,
+- configure relayer/verifier allowlists,
+- set required verifier assertions,
+- implement `_conceroReceive(bytes)`.
+
+## Step 3: Send from source chain
+
+Follow [Send a Cross-Chain Message](/integrate-concero/send-a-message):
+
+- build `MessageRequest`,
+- quote fee with `getMessageFee`,
+- call `conceroSend` with native fee.
+
+## Step 4: Confirm delivery on destination chain
+
+Follow [Receive a Message](/integrate-concero/receive-a-message) to validate receiver policy and payload decoding.
+
+## Step 5: Track status end to end
+
+Use [Track a Message](/integrate-concero/track-a-message) with the returned `messageId`.
+
+## What the protocol enforces vs what you enforce
+
+| Layer | Enforced by protocol/contracts | Enforced by your app |
+|---|---|---|
+| Router auth | Router controls `submitMessage` flow and relayer authorization through `relayerLib.validate` | N/A |
+| Receiver auth | `ConceroClientBase` requires router-only caller and relayer allowlist | N/A |
+| Verifier checks | Router computes `validationChecks` from selected verifier libs | Your app decides assertion policy in `ConceroClient` or custom `_validateMessageSubmission` |
+| Business logic | N/A | `_conceroReceive` implementation |
+
+## Next steps
+
+- If this is your first integration, continue with [Set up ConceroClient](/integrate-concero/set-up-conceroclient).
+- If you need operations and rollout guidance, read [Infrastructure Deployment Pipeline](/technical-architecture/deployment-pipeline).
+- For common failures, use [Troubleshooting](/integrate-concero/troubleshooting).

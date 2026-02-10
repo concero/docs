@@ -100,7 +100,7 @@ export default defineConfig({
 	sidebar: [
 		{
 			text: 'Introduction to Concero',
-			collapsed: true,
+			collapsed: false,
 			items: [
 				{
 					text: 'What is Concero?',
@@ -137,6 +137,14 @@ export default defineConfig({
 				// 	link: '/integrate-concero/overview',
 				// },
 				{
+					text: 'Getting Started',
+					link: '/integrate-concero/getting-started',
+				},
+				{
+					text: 'Integration Overview',
+					link: '/integrate-concero/overview',
+				},
+				{
 					text: 'Set up ConceroClient',
 					link: '/integrate-concero/set-up-conceroclient',
 				},
@@ -152,11 +160,15 @@ export default defineConfig({
 					text: 'Track a message',
 					link: '/integrate-concero/track-a-message',
 				},
+				{
+					text: 'Troubleshooting',
+					link: '/integrate-concero/troubleshooting',
+				},
 			],
 		},
 		{
 			text: 'Integrate as a Chain',
-			collapsed: false,
+			collapsed: true,
 			items: [
 				{
 					text: 'Add your network to Concero',

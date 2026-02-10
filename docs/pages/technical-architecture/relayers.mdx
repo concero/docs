@@ -4,52 +4,39 @@ title: Concero V2 Relayers
 
 # Concero V2 Relayers
 
-In **Concero V2**, relayers are **opt-in and per-message**.
+In Concero V2, relayer choice is per message via `messageRequest.relayerLib`.
 
-There is **no protocol-level global relayer registry**. A relayer is selected per message through `messageRequest.relayerLib`.
+There is no single protocol-level global relayer set.
 
-In practice, usability depends on the selected `relayerLib` policy:
+## What a `relayerLib` controls
 
-1. users **explicitly select** that `relayerLib`,
-2. and the `relayerLib` may enforce submitter authorization (for example, allowlists in Concero-run modules).
+A relayer module defines:
 
-If a user doesn’t point to your relayer module, you won’t be responsible for that message.
+- **Pricing** via `IRelayerLib.getFee(...)`.
+- **Submitter authorization** via `IRelayerLib.validate(...)`.
 
-> **Current status:** at the moment there is one Concero-run relayer in production: `concero`.
+If a relayer is not authorized by the selected module, destination submission fails.
 
+## Relayer responsibilities
 
-## Key idea: relayer = chosen `relayerLib`
+When users select your relayer module, relayer operators are expected to:
 
-Concero’s router treats the relayer as a **contract address** (`messageRequest.relayerLib`) that defines two things:
+1. watch `ConceroMessageSent` for that `relayerLib`,
+2. gather verifier outputs required by selected verifier modules,
+3. submit destination message with proofs/check inputs,
+4. handle retries for retryable submissions.
 
-* **Pricing**: how much native fee is required to deliver a message (`IRelayerLib.getFee`)
-* **Authorization**: who is allowed to submit messages on behalf of that relayer (`IRelayerLib.validate`)
+## What relayers do not decide
 
-So the network doesn’t maintain a “relayer set”. **Users pick the relayer by picking the relayer’s `relayerLib` address.**
+Relayer does not have final say on app-level message acceptance.
+
+Destination app policy still decides whether checks are sufficient.
+
+## Current status
+
+- Current Concero-run relayer is admin-gated via allowlisted submitters.
+- Apps can select custom relayer modules, including permissionless implementations.
 
 :::note
-The current relayer is run by Concero, and uses its allowlisted submitters. Apps can choose other custom relayer networks, including permissionless implementations.
+Custom RPC metadata selection for relayers is planned but not available yet.
 :::
-
-
-## Relayer responsibilities (V2)
-
-If users select your relayer (`relayerLib`) you’re expected to:
-
-1. **Monitor `ConceroMessageSent`** for your `relayerLib`
-2. **Build a destination submission**:
-
-* gather verifier proofs (`validations`) corresponding to the message’s verifiers
-* call `submitMessage(...)` on the destination router
-3. **Maintain uptime + gas** on destination chains (and any infra needed to source proofs)
-4. **Handle failed deliveries**:
-
-* resubmit if appropriate,
-* or use retry flow when a submission is marked retryable
-
-## Notes for integrators
-
-* The router does **not** enforce “at least N verifiers must pass” at the protocol level; it forwards `validationChecks` (verification checks) to the receiver. Your receiver contract decides what must be asserted.
-* If a selected relayer module has only one authorized submitter and it is down, delivery may halt. If the module authorizes multiple submitters, failover is possible.
-
----

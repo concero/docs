@@ -1,31 +1,59 @@
 ---
-Title: Add Your Network
-Description: Learn how to add your network to Concero's messaging protocol.
+title: Add Your Network
+description: How chain teams onboard their network into Concero V2.
 ---
-
 
 # Add Your Network
 
+This page is for chain teams that want to onboard their network into Concero V2.
+
+## Responsibilities
+
+| Task | Chain team | Concero team |
+|---|---|---|
+| Fund deployer/operator gas wallets | Yes | No |
+| Submit network metadata PR | Yes | Review |
+| Submit RPC endpoints PR | Yes | Review |
+| Deploy router and module infra | No | Yes |
+| Enable production delivery path | No | Yes |
+
+## Step-by-step
+
 ::::steps
+### 1. Fund required operational addresses
 
-### Fund Concero wallets & operators with gas
+Send gas token to required deployer/operator addresses shared by Concero for your environment.
 
-To enable Concero's cross-chain messaging protocol to operate on your network, fund the following addresses with corresponding gas amounts:
+### 2. Submit network metadata PR
 
-| Address          | Type | Amount to send |
-|------------------|------------|------------|
-| 0xDddDDb8a8E41C194ac6542a0Ad7bA663A72741E0 | Testnet Deployer | 0.1 ETH |
-| 0xddDd5f804B9D293dce8819d232e8D76381605a62 | Mainnet Deployer | 0.1 ETH |
-| 0xeee38505c47acba0c866df7265bd3e25da596b27 | Operator | 0.01 ETH |
+Submit your network configuration to:
 
+- [concero/v2-networks](https://github.com/concero/v2-networks)
 
-### Create a pull request to the Concero v2-networks repository
+Follow repository README and PR format.
 
-After funding the operators, submit your network configuration through a pull request to [Concero v2-networks repository](https://github.com/concero/v2-networks):
+### 3. Submit RPC endpoints PR
 
-1. Fork the [v2-networks repository](https://github.com/concero/v2-networks)
-2. Create a new branch named `add-[YOUR_NETWORK_NAME]`
-3. Follow the PR guidelines in the [README.md](https://github.com/concero/v2-networks/blob/master/README.md)
-4. Submit a pull request, so the Concero team can review your submission. We may request changes or additional information before merging your network into the repository.
+Submit RPC endpoints to:
+
+- [concero/rpcs](https://github.com/concero/rpcs)
+
+### 4. Wait for deployment and enablement
+
+After merge and review:
+
+- Concero deploys/updates router + required module configuration.
+- Concero enables delivery path for supported routes.
 
 ::::
+
+## Notes
+
+- Merging network metadata and RPC metadata does not by itself guarantee message delivery.
+- Delivery depends on relayer/verifier module configuration and off-chain workflow readiness.
+- Custom RPC selection via per-message relayer/verifier metadata is planned, but not available yet.
+
+## Next steps
+
+- Read [Infrastructure Deployment Pipeline](/technical-architecture/deployment-pipeline) for full operator flow.
+- Check [Supported Networks](/integrate-concero/supported-networks) after onboarding completes.

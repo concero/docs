@@ -1,32 +1,41 @@
 ---
 title: What makes Concero different?
-description: Differences that make Concero different from other cross-chain solutions.
+description: How Concero V2 differs from fixed-trust interoperability designs.
 ---
 
 # What Makes Concero Different
 
-Concero V2 focuses on **cryptographic message security** with a **configurable verification stack**.
+Concero V2 is a cryptographic messaging protocol where trust assumptions are chosen per message.
 
-Instead of enforcing one global trust model, each message can define which relayer module and verifier modules are used. The destination app contract then authenticates and asserts the message using its own policy.
+![Concero's Message Security](/images/concero-v2-message-verification.png)
 
-![Concero's Message Security](/images/concero-v2-dual-layer-security.png)
+## Per-message security composition
 
-## Cryptographic Verification by Default
+Each message can define:
 
-Concero verification is based on cryptographic artifacts and destination-chain checks. In practice, this includes:
+- relayer module for delivery authorization and pricing,
+- verifier modules for cryptographic checks,
+- app-level assertion policy on the destination contract.
 
-- Signature recovery to confirm node authenticity
-- Quorum-based verifier assertions (defined by selected modules and app policy)
-- Hash verification to ensure data integrity during transmission
+## Destination app has final acceptance policy
 
-## Stack-Defined Security
+The router computes verifier check results.
 
-Security depends on which modules are selected in the message stack:
+Your destination app decides whether to accept/assert the message using:
 
-- **Relayer module (`relayerLib`)**: pricing and submitter authorization.
-- **Verifier modules (`validatorLibs` in the current interface naming)**: cryptographic verification checks.
-- **Destination app policy**: final authentication/assertion logic in `ConceroClientBase` / `ConceroClient`.
+- `ConceroClient` strict policy, or
+- custom policy in `ConceroClientBase`.
+
+## Why this matters
+
+- No single global trust model for every app.
+- Security can match application risk.
+- Module choice is explicit and auditable in message parameters.
 
 :::note
-Current Concero-run relayer and verifier modules are configured with allowlists/roles. Developers can choose other custom modules, including permissionless implementations, in their own message stacks.
+Current interface naming still uses `validatorLibs` / `validationChecks`.
+:::
+
+:::note
+Current Concero-run relayer and verifier modules are admin-gated. Apps may use custom modules, including permissionless implementations.
 :::

@@ -1,24 +1,34 @@
 ---
 title: Concero Applications and Possibilities
-description: This section suggest the applications and possibilities of using Concero.
+description: Typical use cases for configurable cross-chain messaging.
 ---
 
 # Enabling a New Class of Applications
 
-Concero is more than a messaging protocol, it is a foundational layer designed to unlock a new generation of sophisticated cross-chain applications. 
-
-By removing critical limitations around data capacity and chain restrictions, Concero provides developers with the tools to build solutions that were previously not technically feasible.
+Concero is messaging infrastructure for apps that need reliable, configurable cross-chain execution.
 
 ![Concero's Applications Possibilities](/images/concero-v2-use-cases.png)
 
-The protocol's high-throughput messaging and adaptable security architecture support a broad spectrum of advanced use cases, but not limited to:
+## Common use cases
 
-* **Next-Generation DeFi:** Developers can create truly unified financial applications. This includes building multi-chain lending and borrowing platforms, executing atomic flash loans across disparate networks, and creating complex strategies that leverage liquidity from the entire blockchain ecosystem as if it were one.
+- **DeFi coordination**
+Cross-chain actions such as risk updates, strategy execution, or settlement triggers.
 
-* **NFTs and Interoperable Metaverses:** Concero's ability to transmit up to 1.875 MB of data per message is transformative for digital assets. It enables large-scale NFT migrations that preserve full metadata and ownership history, which is a crucial feature for high-value collections. This also lays the groundwork for seamless metaverse experiences where assets and identities operate consistently across different virtual worlds.
+- **Cross-chain governance**
+Send proposal decisions and execute governance actions across networks.
 
-* **Decentralised Governance (DAOs):** The protocol allows for the implementation of reliable and multi-chain governance systems. DAOs can coordinate proposals, manage treasuries, and synchronise operations across their entire ecosystem, ensuring that decisions are executed securely and reliably on all relevant chains.
+- **Interoperable game and identity systems**
+Synchronize state and ownership logic between chains.
 
-* **Enterprise and Institutional Systems:** For use cases that demand high security and regulatory compliance, Concero's flexible security model is ideal. Developers can implement additional verification layers to build secure supply chain logistics, coordinate between private and public ledgers, and create other enterprise-grade solutions with tailored security guarantees.
+- **Enterprise and operational workflows**
+Coordinate state changes across private/public environments with explicit verifier policy.
 
-These initial use cases are just the beginning. As the foundational middleware for a borderless ecosystem, Concero offers developers significant freedom to architect the future of interoperable applications.
+## What makes these possible
+
+- Per-message relayer and verifier selection.
+- Destination-side authentication/assertion in app contracts.
+- Deterministic message receipts for indexing and replay-safe handling.
+
+## Builder guidance
+
+Start with strict defaults (`ConceroClient`, allowlisted modules, clear assertion count), then loosen policy only where needed.

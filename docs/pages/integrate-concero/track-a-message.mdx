@@ -1,54 +1,54 @@
 ---
 title: Track a Message
-description: Learn how to track the status of cross-chain messages using Concero’s messaging protocol.
+description: Query Concero API for message status and transaction links.
 ---
 
-# Tracking a message
+# Track a Message
 
-Track messages sent through Concero’s messaging protocol and obtain detailed status, origin, destination, and transaction information.
+Use this API to check source and destination status for a cross-chain message.
 
-## Endpoint & Method
+:::info
+The easiest non-programmatic way to see the status of a message is to use [Concero Scan](https://scan.concero.io).
+:::
+## Endpoint
 
-- **Method:** `GET`  
-- **URL:** `https://api.v2.concero.io/api/v1/scan/tx`
+- Method: `GET`
+- URL: `https://api.v2.concero.io/api/v1/scan/tx`
 
-## Query Parameters
+## Required query strategy
 
-| Parameter    | Type   | Description                                               | Required/Optional |
-|--------------|--------|-----------------------------------------------------------|-------------------|
-| `messageId`  | string | Unique identifier of the message                          | Optional          |
-| `srcHash`    | string | Source chain transaction hash                             | Optional          |
-| `dstHash`    | string | Destination chain transaction hash                        | Optional          |
-| `sender`     | string | Address of the message sender                             | Optional          |
-| `receiver`   | string | Address of the message recipient                          | Optional          |
-| `take`       | number | Number of messages to return (pagination limit)           | Optional          |
-| `skip`       | number | Number of messages to skip (pagination offset)            | Optional          |
+Provide at least one primary filter:
 
-> **Note:** One of `messageId`, `srcHash`, `dstHash`, `sender`, or receiver must be provided. Use `take` and `skip` for pagination control.
+- `messageId`
+- `srcHash`
+- `dstHash`
+- `sender`
+- `receiver`
 
-## Response Structure
+Optional pagination:
 
-The API response includes:
+- `take`
+- `skip`
 
-- **`code`** — API response status (`ok` or error codes)  
-- **`payload.transactions`** — Array of matched message transactions  
-- **`payload.pagination`** — Pagination information (`take` and `skip`)
+## Quick examples
 
-## Example
+### Query by `messageId`
 
-### Request
-
-Below is an example demonstrating how to make a request to the Concero API to track a specific message by its `messageId`. The request uses the GET method with the `messageId` and pagination options as query parameters.
-
-```shell
-curl -X 'GET' \
-  'https://api.v2.concero.io/api/v1/scan/tx?&messageId=0xfff31ff0333baba7b54da7710edfc2fb7b645e95e57ebb44cfe06a505c0410f6&take=1&skip=0' \
+```bash
+curl -X GET \
+  'https://api.v2.concero.io/api/v1/scan/tx?messageId=0xYOUR_MESSAGE_ID&take=1&skip=0' \
   -H 'accept: application/json'
 ```
 
-### Response
+### Query by source tx hash
 
-Following the request example is a sample JSON response showing the structure of the data returned by the API. This response includes transaction details such as the message status, token transfers, source and destination chain information, and pagination metadata.
+```bash
+curl -X GET \
+  'https://api.v2.concero.io/api/v1/scan/tx?srcHash=0xYOUR_SOURCE_TX_HASH&take=10&skip=0' \
+  -H 'accept: application/json'
+```
+
+## Expected Response
 
 ```json
 {
@@ -56,55 +56,38 @@ Following the request example is a sample JSON response showing the structure of
   "payload": {
     "transactions": [
       {
-        "type": "lbf",
-        "id": "0xfff31ff0333baba7b54da7710edfc2fb7b645e95e57ebb44cfe06a505c0410f6",
+        "id": "0x...",
         "status": "success",
-        "isFinalityRequired": false,
-        "dstChainGasLimit": "0",
-        "messagePayload": "0x0000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000239d5b78680e9ad600ab41e56508670ba9e78f51000000000000000000000000239d5b78680e9ad600ab41e56508670ba9e78f5100000000000000000000000000000000000000000000000000000000000f187b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011e00000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000000",
         "from": {
-          "chain": {
-            "id": 421614,
-            "selector": 421614,
-            "name": "Arbitrum Sepolia"
-          },
-          "token": {
-            "name": "USD Coin",
-            "symbol": "USDC.e",
-            "address": "0xefc3ac3bcb37f0f26efde1e1b06609bdff690604",
-            "decimals": 6,
-            "priceUsd": 1,
-            "amount": 0.99
-          },
-          "address": "0x239d5b78680e9ad600ab41e56508670ba9e78f51",
-          "hash": "0xeda4c75e41b6f1bea80a9fb116e67f6e99518b4eb7fccf1587348eac00a49791",
+          "chain": { "id": 421614, "name": "Arbitrum Sepolia" },
+          "hash": "0x...",
           "timestamp": 1758708525
         },
         "to": {
-          "chain": {
-            "id": 43113,
-            "selector": 43113,
-            "name": "Avalanche Fuji"
-          },
-          "token": {
-            "name": "USD Coin",
-            "symbol": "USDC.e",
-            "address": "0x855f39baacaf30d7de448542316a889ee4db4ddb",
-            "decimals": 6,
-            "priceUsd": 1,
-            "amount": 0.989307
-          },
-          "address": "0x239d5b78680e9ad600ab41e56508670ba9e78f51",
-          "hash": "0x4c321b5b88eed8d38baeb1c81527758b2bdfb562e6ea94cb0ca6251f657442f4",
+          "chain": { "id": 43113, "name": "Avalanche Fuji" },
+          "hash": "0x...",
           "timestamp": 1758708536
         }
       }
     ],
-    "pagination": {
-      "skip": 0,
-      "take": 1
-    }
+    "pagination": { "skip": 0, "take": 1 }
   }
 }
 ```
 
+Interpretation:
+
+- `id`: message ID.
+- `status`: current high-level state.
+- `from.hash`: source-chain transaction hash.
+- `to.hash`: destination-chain transaction hash (when delivered).
+
+## Suggested workflow
+
+1. Save `messageId` returned by `conceroSend`.
+2. Poll by `messageId` until `status` is terminal.
+3. If missing destination hash for too long, inspect module authorization and app assertion settings.
+
+## Troubleshooting link
+
+If status stalls or fails, check [Troubleshooting](/integrate-concero/troubleshooting).

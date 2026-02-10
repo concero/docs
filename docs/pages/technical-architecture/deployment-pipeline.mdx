@@ -1,91 +1,69 @@
 ---
-
 title: Infrastructure Deployment Pipeline
-description: Step-by-step guide describing how Concero deploys infrastructure to a new network.
-
+description: Operational pipeline for enabling a new chain in Concero V2.
 ---
 
 # Infrastructure Deployment Pipeline
 
-This page outlines the process followed by the Concero Team to deploy infrastructure on a new network. The pipeline ensures seamless integration of a new chain into the Concero ecosystem, including network configuration, contract deployment, and off-chain synchronization.
+This page describes how a new chain becomes operational in Concero V2.
 
-The deployment process consists of the following sequential steps:
+## Responsibilities matrix
 
----
+| Workstream | Chain team | Concero team |
+|---|---|---|
+| Provide gas funding for deployment/ops wallets | Yes | No |
+| Submit chain metadata PR | Yes | Review |
+| Submit RPC metadata PR | Yes | Review |
+| Deploy `ConceroRouter` and supporting contracts | No | Yes |
+| Configure relayer/verifier modules | No | Yes |
+| Turn on production delivery | No | Yes |
 
-### 1. Chain Provides Gas Funding
+## Pipeline steps
 
-The target blockchain supplies initial gas funds to the Concero deployer and operator addresses. This enables them to execute transactions on the new network.
+::::steps
+### 1. Gas funding
 
----
+Chain team funds required operational addresses.
 
-### 2. Registering the Network in [`@concero/v2-networks`](https://github.com/concero/v2-networks)
+### 2. Register network metadata
 
-The new blockchain network must be registered in the public GitHub repository [`@concero/v2-networks`](https://github.com/concero/v2-networks).
-This configuration enables Concero tooling and services to recognize and interact with the chain.
+Chain is added in [concero/v2-networks](https://github.com/concero/v2-networks).
 
-> **This step can be completed by the chain team themselves.**
-> Please follow the instructions in the official guide: [Add Your Network](/integrate-concero/add-your-network)
+### 3. Register RPC metadata
 
----
+RPC endpoints are added in [concero/rpcs](https://github.com/concero/rpcs).
 
-### 3. Adding RPC Endpoints to [`@concero/rpcs`](https://github.com/concero/rpcs)
+### 4. Deploy/upgrade core contracts
 
-RPC endpoints must be submitted to the [`@concero/rpcs`](https://github.com/concero/rpcs) repository so that verifier and operators can communicate with the new chain.
+Concero deploys `ConceroRouter` (implementation + proxy) and required dependencies.
 
-> **Chain teams can also submit this information directly.**
-> Detailed steps are provided in the [Add Your Network](/integrate-concero/add-your-network) documentation.
+### 5. Configure modules
 
----
+Concero configures production relayer and verifier modules for the new chain:
 
-### 4. Deployment of `PriceFeeds`
+- relayer authorization,
+- verifier signer/workflow/gas settings,
+- destination routing checks.
 
-The Concero Team deploys the `PriceFeeds` contract to the new chain, initializing it with the appropriate gas price parameters based on current market conditions.
+### 6. Start off-chain services
 
----
+Relayer and verifier workflows begin monitoring and processing for enabled routes.
 
-### 5. Automatic Off-Chain Updater Integration
+### 7. Enable delivery path
 
-The off-chain PriceFeeds updater service automatically discovers the new chain, loads the RPC endpoints and PriceFeeds deployment, and begins updating price data for the new network.
-No manual configuration is needed after contract deployment.
+Concero enables end-to-end route delivery for supported paths.
 
----
+::::
 
-### 6. Deployment of `ConceroRouter`
+## Important caveats
 
-The team deploys the `ConceroRouter` implementation and proxy for the new chain.
+- Router deployment alone does not guarantee working message delivery.
+- Route readiness depends on module authorization and off-chain workflow health.
+- Current Concero-run relayer/verifier modules are admin-gated.
+- Custom RPC selection via relayer/verifier metadata is planned but not available yet.
 
----
+## Related docs
 
-### 7. Automatic Router Monitoring by Operator
-
-> *Operators will automatically detect and begin monitoring the newly deployed ConceroRouter.*
-
-At this point, message delivery still depends on relayer/verifier module configuration and off-chain workflow readiness.
-
----
-
-### 8. CRE Verifier Module Update
-
-The Concero Team updates verifier-side workflow configuration:
-
-* **Adding RPC endpoints** for the new network so workflows can interact with it reliably
-* Registers the address of the new `ConceroRouter`
-
-> *(This process will soon be automated and fetched directly from Git.)*
-
----
-
-### 9. Enable Delivery Path
-
-Finally, the team enables end-to-end delivery by:
-
-* configuring relayer module authorization,
-* configuring verifier module parameters (for example signer sets/workflow IDs/gas limits),
-* ensuring off-chain reporting/worker services are live.
-
-At this point, the new blockchain becomes a fully integrated part of the Concero network and can begin sending and receiving cross-chain messages.
-
-:::note
-Custom RPC selection via relayer/verifier metadata is planned, but this functionality is not available yet.
-:::
+- [Add Your Network](/integrate-concero/add-your-network)
+- [Integration Overview](/integrate-concero/overview)
+- [Current Limitations](/integrate-concero/current-limitations)

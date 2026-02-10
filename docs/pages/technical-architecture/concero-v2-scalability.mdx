@@ -1,121 +1,58 @@
 ---
 title: Concero V2 Scalability
-description: A technical exploration of how Concero V2 transforms blockchain interoperability into a universal utility through its highly scalable architecture.
+description: Why Concero V2 can scale integration across many chains with modular operations.
 ---
 
 # Concero V2 Scalability
 
-## The Interoperability Challenge
+Concero V2 is designed so adding routes and chains does not require every app to rebuild its cross-chain stack from scratch.
 
-The blockchain ecosystem is experiencing exponential growth in the number of networks, driven by advancements in blockchain development frameworks and rollup-as-a-service platforms. While launching new blockchains has become significantly more accessible, cross-chain connectivity solutions haven't evolved at the same pace, creating an expanding "interoperability gap."
+## Main scaling idea
 
-![Blockchain Growth Projection](/images/concero-blockchains-projection.png)
-*Figure 1 – Projection showing the growing gap between the number of blockchains and the cumulative integrations supported by leading interoperability protocols.*
+Separate concerns:
 
-## Traditional Integration Limitations
+- **Apps** choose relayer/verifier modules per message.
+- **Modules** handle delivery and verification logic.
+- **Ops pipeline** handles network onboarding and module configuration.
 
-Conventional interoperability protocols face significant scaling challenges:
+This keeps app integration surface area small.
 
-### 1. High Integration Costs
+## What scales well
 
-- Engineering and audit costs typically range from **$100,000 to $250,000** per blockchain integration
-- Integration processes often take months to complete
-- Each new chain requires custom development work
+- One consistent send/receive contract interface.
+- Per-message module selection instead of fixed global route assumptions.
+- Deterministic message receipts for indexing and retries.
 
-### 2. Infrastructure Overhead
+## Cost model summary
 
-- Most protocols require dedicated verifier infrastructure for each new chain
-- Verifiers often need full nodes or light clients for every supported blockchain
-- Monthly infrastructure costs scale linearly with chain count
-- Some protocols require additional economic layers to compensate operators for additional chains
+Message fee is dynamic and depends on:
 
-### 3. Manual Configuration
+- selected relayer module,
+- selected verifier modules,
+- chain fee inputs used by those modules.
 
-- Relayers require manual configuration for each new network
-- Limited automation in the onboarding process
-- Complex coordination between protocol teams and chain developers
+There is no fixed universal fee schedule.
 
-## Concero V2's Scalable Architecture
+## Security model at scale
 
-Concero V2 fundamentally reimagines interoperability as a universal utility that should be frictionless, low-cost, and available by default. This is achieved through several architectural innovations:
+Concero V2 uses cryptographic verification with stack-defined security.
 
-### Zero-Node Integration Model
+Security level depends on:
 
-Unlike traditional protocols that require dedicated nodes for each blockchain, Concero V2 leverages existing public RPC endpoints through its **Trusted RPC Registry**. This eliminates the need for deploying new infrastructure when onboarding chains:
+1. selected relayer module,
+2. selected verifier modules,
+3. destination app assertion policy.
 
-- **Open-source registry**: Chain integrations happen through simple pull requests to the [Trusted RPC Registry](http://github.com/concero/v2-networks)
-- **Verification process**: RPC endpoints undergo review before being approved
-- **Instant availability**: Once merged, chains become immediately available to the entire network
+## Integrator guidance
 
-### Auto-Discovery Architecture
-
-Concero V2's relayer network features an auto-discovery mechanism that eliminates manual configuration:
-
-1. New chains added to the registry are automatically detected by relayers
-2. Relayers dynamically update their service capabilities
-3. No downtime or manual coordination required
-4. Seamless integration without service interruptions
-
-### Cryptographic Security at Scale
-
-Concero V2 uses a cryptographic security model where message security depends on the selected relayer and verifier stack:
-
-- **Per-message security composition**: Applications choose relayer and verifier modules per message.
-- **Destination-side assertion**: Destination contracts authenticate/assert messages using app-defined policy.
-- **Module flexibility**: Teams can use Concero-run modules or custom modules, including permissionless implementations.
-
-### Streamlined Transaction Flow
-
-Concero V2's architecture maintains consistent performance regardless of how many chains are supported:
-
-1. User initiates a cross-chain message on the source chain
-2. Relayers detect the event and forward it to the Arbitrum-based Concero Verifier
-3. Chainlink-powered verifier workflows cryptographically verify source-chain transaction presence
-4. A verification report is generated and sent back to the relayer
-5. Relayer delivers the verified message to the destination chain
-6. Destination app authenticates/asserts the message and processes it
-
-This process remains constant regardless of which chains are involved, providing predictable performance across the entire ecosystem.
-
-## Cost-Effective Scaling
-
-Concero V2 transforms the economics of cross-chain interoperability:
-
-### Minimal Integration Costs
-
-- **$0 onboarding fee**: No six-figure integration costs
-- **Dynamic per-message pricing**: Fees are derived from relayer and verifier modules plus chain fee inputs
-- **No inflation**: Protocol doesn't require token inflation to support more chains
-
-### Fixed Infrastructure Requirements
-
-- **No additional nodes**: Adding chains doesn't increase infrastructure requirements
-- **Leverages existing infrastructure**: Uses established RPC providers
-- **Consistent operational costs**: Cost structure remains stable regardless of chain count
-
-## Protocol Comparisons
-
-| Feature | Concero V2 | Traditional Interoperability Protocols |
-|---------|------------|----------------------------------------|
-| Chain Onboarding | Pull request to open-source registry | Custom integration process |
-| Integration Cost | $0 | $100k-$250k |
-| Time to Integrate | Hours/Days | Weeks/Months |
-| Node Requirements | Zero new nodes | Full/light nodes for each chain |
-| Relayer Configuration | Automatic | Manual |
-| Security Model | Cryptographic, stack-defined | Typically fixed per protocol |
-| Message Fee | Dynamic (module and chain dependent) | Variable, typically higher |
-
-## The Future of Interoperability as a Utility
-
-Concero V2's architecture aligns with the vision of interoperability as a public good, similar to internet protocols like HTTP and SMTP. As blockchain deployment continues to commoditize, Concero provides the foundation for:
-
-1. **Permissionless integration**: Any chain with public RPC endpoints can be integrated
-2. **Seamless connectivity**: New chains are automatically connected to the entire ecosystem
-3. **Consistent user experience**: End users experience reliable cross-chain messaging regardless of destination
-4. **Future-proof scalability**: Architecture designed to support thousands of blockchains
-
-By transforming interoperability from a premium service to a universal utility, Concero V2 paves the way for a truly interconnected blockchain ecosystem capable of supporting the next generation of decentralized applications across thousands of specialized chains.
+- Start with strict destination assertions and known module set.
+- Add routes incrementally.
+- Use tracking and retries as part of standard operations.
 
 :::note
-Custom RPC selection in relayer/verifier metadata is planned, but this functionality is not available yet.
+Current Concero-run relayer/verifier modules are admin-gated via allowlists/roles. Apps can use custom modules, including permissionless implementations.
+:::
+
+:::note
+Custom RPC selection via relayer/verifier metadata is planned but not available yet.
 :::
