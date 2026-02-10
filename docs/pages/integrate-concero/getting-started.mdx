@@ -60,7 +60,7 @@ Use [Track a Message](/integrate-concero/track-a-message) with the returned `mes
 |---|---|---|
 | Router auth | Router controls `submitMessage` flow and relayer authorization through `relayerLib.validate` | N/A |
 | Receiver auth | `ConceroClientBase` requires router-only caller and relayer allowlist | N/A |
-| Verifier checks | Router computes `validationChecks` from selected verifier libs | Your app decides assertion policy in `ConceroClient` or custom `_validateMessageSubmission` |
+| Verifier checks | Router computes `validationChecks` from selected verifier libs | Your app decides verification policy in `ConceroClient` or custom `_validateMessageSubmission` |
 | Business logic | N/A | `_conceroReceive` implementation |
 
 ## Next steps

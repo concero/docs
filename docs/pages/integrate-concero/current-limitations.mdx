@@ -1,0 +1,30 @@
+---
+title: Current Limitations
+description: Shipped constraints and planned capabilities for Concero V2 integrations.
+---
+
+# Current Limitations
+
+This page captures what is available now vs planned.
+
+## Available now
+
+- Cryptographic message verification with stack-selected relayer and verifier modules.
+- Destination-side message authentication/verification in `ConceroClient` / `ConceroClientBase`.
+- Dynamic message fee based on selected modules and chain inputs.
+- Retry functions for retryable submissions.
+
+## Current shipped module defaults
+
+- Current Concero-run relayer and verifier modules are admin-gated via allowlists/roles.
+- Integrators can choose custom modules, including permissionless implementations, in their own message stack.
+
+## Planned (not available yet)
+
+- Custom RPC selection exposed directly via relayer metadata and verifier metadata.
+
+## Integration guidance
+
+- Build your app assuming current shipped module behavior.
+- Treat planned metadata-level RPC selection as future capability.
+- Keep module choices and app verification policy explicit in your app docs and runbooks.

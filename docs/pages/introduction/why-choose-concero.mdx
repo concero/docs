@@ -15,7 +15,7 @@ For each message, you choose:
 
 - one relayer module (`relayerLib`),
 - one or more verifier modules (`validatorLibs` in current interface naming),
-- destination-side assertion policy in your app contract.
+- destination-side verification policy in your app contract.
 
 This keeps security explicit and application-specific.
 
@@ -39,7 +39,7 @@ Relayer and verifier modules are pluggable. Apps are not tied to a single protoc
 
 ## What this means for integrators
 
-- You can keep strict assertions for high-value flows.
+- You can keep strict verification assertions for high-value flows.
 - You can define lighter policies for low-risk flows.
 - You can evolve module choices over time without rewriting app business logic.
 

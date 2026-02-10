@@ -39,7 +39,7 @@ Use this page when you encounter issues with Concero integration.
 
 **Symptoms**
 
-- Delivery reaches app but assertion policy fails.
+- Delivery reaches app but verification policy fails.
 
 **Cause**
 
@@ -95,7 +95,7 @@ Use this page when you encounter issues with Concero integration.
 
 - Confirm relayer submitter is authorized by selected `relayerLib`.
 - Confirm verifier module config and signer/workflow setup.
-- Confirm app allowlists and assertion policy.
+- Confirm app allowlists and verification policy.
 
 ## 7) Retry flow usage
 
@@ -111,5 +111,5 @@ Both are callable by anyone after submission is marked retryable.
 1. Confirm source `messageId` and destination chain selector.
 2. Confirm selected `relayerLib` and `validatorLibs` in source event.
 3. Confirm destination app allowlists.
-4. Confirm app assertion policy settings.
+4. Confirm app verification policy settings.
 5. Re-run with a minimal payload and known-good module set.

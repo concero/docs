@@ -26,9 +26,9 @@ Coordinate state changes across private/public environments with explicit verifi
 ## What makes these possible
 
 - Per-message relayer and verifier selection.
-- Destination-side authentication/assertion in app contracts.
+- Destination-side verification in app contracts.
 - Deterministic message receipts for indexing and replay-safe handling.
 
 ## Builder guidance
 
-Start with strict defaults (`ConceroClient`, allowlisted modules, clear assertion count), then loosen policy only where needed.
+Start with strict defaults (`ConceroClient`, allowlisted modules, clear verification count), then loosen policy only where needed.
