@@ -27,8 +27,8 @@ contract YourDapp is ConceroClient {
         uint32 gasLimitOnDst,
         address relayerLib,
         bytes calldata relayerConfig,          // can be empty
-        address[] calldata validatorLibs,
-        bytes[] calldata validatorConfigs,     // can be empty
+        address[] calldata verifierLibs,
+        bytes[] calldata verifierConfigs,      // can be empty
         string calldata text
     ) external payable returns (bytes32 messageId) {
         IConceroRouter router = IConceroRouter(i_conceroRouter);
@@ -43,14 +43,14 @@ contract YourDapp is ConceroClient {
             srcBlockConfirmations: 0,              // set if you use it
             feeToken: address(0),                  // native fees
             relayerLib: relayerLib,                // per-message relayer selection
-            validatorLibs: validatorLibs,
-            validatorConfigs: validatorConfigs,
+            validatorLibs: verifierLibs,           // interface naming keeps `validator*`
+            validatorConfigs: verifierConfigs,     // interface naming keeps `validator*`
             relayerConfig: relayerConfig,
             dstChainData: dstChainData,
             payload: bytes(text)
         });
 
-        // 3) Quote total fee (relayer + validators), then send
+        // 3) Quote total fee (relayer + verifiers), then send
         uint256 fee = router.getMessageFee(req);
         messageId = router.conceroSend{value: fee}(req);
     }
@@ -65,7 +65,11 @@ contract YourDapp is ConceroClient {
 
 ## `MessageRequest`
 
-Your request is the single source of truth for pricing, receipt packing, relayer selection, and validator setup.
+Your request is the single source of truth for pricing, receipt packing, relayer selection, and verifier setup.
+
+:::note
+Current interface naming uses `validatorLibs` and `validatorConfigs`. In this guide these refer to verifier libraries and verifier configs.
+:::
 
 At minimum (based on current packing logic) the router expects fields equivalent to:
 
@@ -81,7 +85,7 @@ struct MessageRequest {
     uint64 srcBlockConfirmations;
 
     /// @notice Which token you pay fees in.
-    /// @dev Use address(0) for native; ERC20 support depends on selected relayer/validator libs.
+    /// @dev Use address(0) for native; ERC20 support depends on selected relayer/verifier libs.
     address feeToken;
 
     /// @notice The relayer module you want to deliver this message.
@@ -89,13 +93,13 @@ struct MessageRequest {
     ///      (per its own rules) is expected/allowed to submit the delivery.
     address relayerLib;
 
-    /// @notice Which validator modules you want to use to attest/verify this message.
-    /// @dev You choose the security model per message by choosing the validator libs.
+    /// @notice Which verifier modules you want to use to attest/verify this message.
+    /// @dev You choose the security model per message by choosing these modules.
     address[] validatorLibs;
 
-    /// @notice Configuration for each validator module.
-    /// @dev One config per validator lib (must match validatorLibs length).
-    ///      Typical examples: validator gas limits, thresholds, or other validator-specific params.
+    /// @notice Configuration for each verifier module.
+    /// @dev One config per verifier lib (must match validatorLibs length).
+    ///      Typical examples: verifier gas limits, thresholds, or module-specific params.
     bytes[] validatorConfigs;
 
     /// @notice Relayer-specific configuration for this message.
@@ -133,7 +137,7 @@ function getMessageFee(
 What’s inside:
 
 * **relayer fee** (computed by the chosen `relayerLib`)
-* **+ validator fees** (computed by validator libs)
+* **+ verifier fees** (computed by verifier libs)
 
 ---
 
@@ -163,6 +167,10 @@ event ConceroMessageSent(
     address relayerLib
 );
 ```
+
+:::note
+Custom RPC selection via relayer/verifier metadata is planned, but this functionality is not available yet.
+:::
 
 ## EVM destination chain data
 

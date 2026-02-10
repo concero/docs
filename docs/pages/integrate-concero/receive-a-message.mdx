@@ -4,15 +4,15 @@ title: Receive a Message
 
 # Receive a Message
 
-On the **destination chain**, your contract receives Concero messages through `conceroReceive(...)`, which is called by the **ConceroRouter** after the relayer submits the message and validators are checked.
+On the **destination chain**, your contract receives Concero messages through `conceroReceive(...)`, which is called by the **ConceroRouter** after the relayer submits the message and verifier checks are computed.
 
 
 Concero provides two base contracts to make this safe and consistent:
 
 
-* **`ConceroClientBase`**: minimal base that enforces *router-only calls*, *allowed relayer libs*, and lets you define your own validator policy.
+* **`ConceroClientBase`**: minimal base that enforces *router-only calls*, *allowed relayer libs*, and lets you define your own verification assertion policy.
 
-* **`ConceroClient`**: an opinionated base that enforces a *strict consensus policy* (all required validators must approve + allowlist).
+* **`ConceroClient`**: an opinionated base that enforces a *strict consensus policy* (all required verifier checks must be true + allowlist).
 
 
 You implement hooks depending on which base you use:
@@ -21,6 +21,10 @@ You implement hooks depending on which base you use:
 1. If you inherit `ConceroClientBase`, implement `_validateMessageSubmission(...)` for your security policy.
 
 2. Implement `_conceroReceive(messageReceipt)` for your application logic (decode the receipt and use the payload).
+
+:::note
+Current contract interface names still use `validationChecks` and `validatorLibs`. In this guide we refer to them as verification checks and verifier libraries.
+:::
 
 
 ## What gets called on the destination chain
@@ -67,7 +71,7 @@ require(s_conceroClient.isRelayerLibAllowed[relayerLib], UnauthorizedRelayerLib(
 Even if a user chose some `relayerLib` on the source chain, **your app decides** which relayer libs it accepts on the destination chain.
 
 
-### 3) Your validator policy must pass
+### 3) Your verification assertion policy must pass
 
 
 ```solidity
@@ -81,7 +85,7 @@ _validateMessageSubmission(validationChecks, validatorLibs);
 _conceroReceive(messageReceipt);
 ```
 
-## Choosing a validation policy
+## Choosing a verification policy
 
 ### Option A — Use `ConceroClient` (strict consensus)
 
@@ -92,17 +96,17 @@ _conceroReceive(messageReceipt);
 * **every** `validationChecks[i]` is `true`
 * every `validatorLibs[i]` is allowlisted (`isValidatorAllowed[validatorLibs[i]] == true`)
 
-This is the safest default if you want a simple rule: *exactly N validators, all must approve*.
+This is the safest default if you want a simple rule: *exactly N verifiers, all must assert*.
 
 ### Option B — Implement your own policy in `ConceroClientBase`
 
 For example:
 
-* “2 of 3 validators must approve”
+* “2 of 3 verifiers must assert”
 
-* “validator A required, plus at least one of B,C”
+* “verifier A required, plus at least one of B,C”
 
-* “accept if ANY validator approves” (not recommended, but possible)
+* “accept if ANY verifier asserts” (not recommended, but possible)
 
 ## How to read message data
 
@@ -130,7 +134,7 @@ This example:
 
 * allows only a specific `relayerLib`,
 
-* requires strict validator consensus (via `ConceroClient`),
+* requires strict verifier consensus (via `ConceroClient`),
 
 * decodes the source sender and payload.
 

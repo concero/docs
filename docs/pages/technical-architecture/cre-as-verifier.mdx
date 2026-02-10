@@ -4,17 +4,17 @@ title: Chainlink CRE as verifier
 
 # Chainlink CRE as verifier
 
-Concero uses **Chainlink Runtime Environment (CRE)** to run its own message validation logic in a secure and decentralized way. This setup allows us to define custom off-chain verifiers that execute inside Chainlink’s Decentralized Oracle Network (DON) — providing both **customization** and **trust minimization**.
+Concero uses **Chainlink Runtime Environment (CRE)** to run message verification logic in a secure and decentralized way. This setup allows custom off-chain verifiers to execute inside Chainlink’s Decentralized Oracle Network (DON), providing both **customization** and **trust minimization**.
 
 ## What is the Concero Verifier?
 
-The **Concero Verifier** is a validator module built specifically for CRE. It is written and maintained by the Concero team and runs within Chainlink nodes in a hardened JS runtime. It is used as a part of the **Validation Stack** in Concero Messaging.
+The **Concero Verifier** is a verifier module built specifically for CRE. It is written and maintained by the Concero team and runs within Chainlink nodes in a hardened JS runtime. It is used as part of the **Verification Stack** in Concero Messaging.
 
 Unlike general-purpose JavaScript or external oracles, the Concero Verifier:
 - Has native understanding of Concero message formats
 - Supports proof generation and verification logic specific to the protocol
 - Uses multiple RPCs to fetch and verify data from source chains
-- Aggregates results into signed **validation reports**
+- Aggregates results into signed **verification reports**
 
 ## Why CRE?
 
@@ -32,19 +32,26 @@ Chainlink CRE provides a secure and reproducible off-chain execution layer with:
 4. Each node:
 - Queries source chain RPCs
 - Finds the emitted message
-- Validates its content and metadata
+- Verifies its content and metadata
 - Signs the result
 5. The DON aggregates these signatures into a report and returns it to the relayer.
-6. The relayer submits the report on the destination chain, where the Concero Router verifies it on-chain and executes the message.
+6. The relayer submits the report on the destination chain, where message checks are executed and the destination app authenticates/asserts the message.
 
 ## When to use
 
 The Concero Verifier in CRE is ideal for:
 - Applications requiring **off-chain verification with on-chain enforcement**
-- Teams that trust Chainlink’s DON as execution layer but want **full control over the validation logic**
+- Teams that trust Chainlink’s DON as execution layer but want **full control over the verification logic**
 - Use cases that need **secure access to source chain state** without light clients
 
 ## Composable & Optional
 
-The Concero Verifier is one of many modules you can include in your message’s validation stack. It can be used alone or combined with other strategies like signature attestations, receipt proofs, or bonded relayers.
+The Concero Verifier is one of many modules you can include in your message’s verification stack. It can be used alone or combined with other strategies like signature attestations and receipt proofs.
 
+:::note
+The current CRE verifier is run by Concero. Applications can choose custom verifier modules in their message stack, including permissionless implementations.
+:::
+
+:::note
+Custom RPC selection via verifier/relayer metadata is planned, but this functionality is not available yet.
+:::

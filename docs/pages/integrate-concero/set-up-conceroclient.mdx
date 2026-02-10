@@ -8,7 +8,7 @@ import { Mermaid } from '../../components/Mermaid'
 
 ConceroClient allows your dApp contracts to send and receive messages from Concero Routers.
 
-The permissionless nature of Concero means _anyone_ can send messages to your contracts. And if your contract is not configured to allowlist certain trusted relayers or verifiers, this will most certainly lead to an attack. Therefore, it's crucial to set up and configure your client to work correctly and securely. Luckily, this is easy to do.
+Anyone can attempt to submit cross-chain messages. If your contract is not configured to allowlist trusted relayer and verifier modules, this can lead to incorrect message acceptance. Therefore, it is critical to configure your client correctly.
 
 ## 1. Install Contracts
 
@@ -20,7 +20,7 @@ npm install @concero/contracts
 
 ## 2. Inherit from ConceroClient
 
-To make things easier, we recommend that your dApp contract inherits from `ConceroClient`. There's always an option to go lower level and inherit straight from `ConceroClientBase` – this will allow to build custom message verification logic.
+To make things easier, we recommend that your dApp contract inherits from `ConceroClient`. There's always an option to go lower level and inherit straight from `ConceroClientBase` to build custom message verification logic.
 
 :::note
 View the full source code for `ConceroClient.sol` on [GitHub](https://github.com/concero/messaging-contracts-v2/blob/master/contracts/ConceroClient/ConceroClient.sol).
@@ -73,13 +73,13 @@ Deploy your contract to the destination chain. During deployment, ensure you pas
 
 `ConceroClientBase` requires you to allowlist the relayer libraries used to submit messages. Use **`_setIsRelayerLibAllowed(address relayerLib, bool isAllowed)`** to toggle whether a specific relayer library is trusted.
 
-### Allow Validator Libraries
+### Allow Verifier Libraries
 
-`ConceroClient` requires you to allowlist validator libraries that verify the message authenticity. Use **`_setIsValidatorAllowed(address validatorLib, bool isAllowed)`** to toggle whether a specific validator library is trusted.
+`ConceroClient` requires you to allowlist verifier libraries that verify message authenticity. Use **`_setIsValidatorAllowed(address validatorLib, bool isAllowed)`** (current interface naming) to toggle whether a specific verifier library is trusted.
 
-### Set Required Validator Count
+### Set Required Verifier Count
 
-You must specify how many validator signatures are required for a message to be considered valid by your contract. Use **`_setRequiredValidatorsCount(uint256 count)`** to set the exact number of validator approvals needed.
+You must specify how many verifier assertions are required for a message to be considered valid by your contract. Use **`_setRequiredValidatorsCount(uint256 count)`** (current interface naming) to set the exact number of required assertions.
 
 ::::
 
@@ -103,7 +103,7 @@ sequenceDiagram
 
     Note over Client: [2] VERIFICATION
     Client->>Client: _validateMessageSubmission(checks, libs)
-    Note over Client: Ensure all required verifier<br/>signatures are valid and are coming from allowlisted verifiers
+    Note over Client: Ensure all required verifier<br/>checks are asserted and sources are allowlisted
 
     Note over Client: [3] APPLICATION LOGIC
     Client->>Client: _conceroReceive(receipt)

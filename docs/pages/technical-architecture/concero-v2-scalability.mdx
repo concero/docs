@@ -24,10 +24,10 @@ Conventional interoperability protocols face significant scaling challenges:
 
 ### 2. Infrastructure Overhead
 
-- Most protocols require dedicated validator infrastructure for each new chain
-- Validators must run full nodes or light clients for every supported blockchain
+- Most protocols require dedicated verifier infrastructure for each new chain
+- Verifiers often need full nodes or light clients for every supported blockchain
 - Monthly infrastructure costs scale linearly with chain count
-- Some protocols inflate token supply to compensate validators for additional chains
+- Some protocols require additional economic layers to compensate operators for additional chains
 
 ### 3. Manual Configuration
 
@@ -44,7 +44,7 @@ Concero V2 fundamentally reimagines interoperability as a universal utility that
 Unlike traditional protocols that require dedicated nodes for each blockchain, Concero V2 leverages existing public RPC endpoints through its **Trusted RPC Registry**. This eliminates the need for deploying new infrastructure when onboarding chains:
 
 - **Open-source registry**: Chain integrations happen through simple pull requests to the [Trusted RPC Registry](http://github.com/concero/v2-networks)
-- **Verification process**: RPC endpoints undergo validation before being approved
+- **Verification process**: RPC endpoints undergo review before being approved
 - **Instant availability**: Once merged, chains become immediately available to the entire network
 
 ### Auto-Discovery Architecture
@@ -56,14 +56,13 @@ Concero V2's relayer network features an auto-discovery mechanism that eliminate
 3. No downtime or manual coordination required
 4. Seamless integration without service interruptions
 
-### Economic Security at Scale
+### Cryptographic Security at Scale
 
-Instead of requiring dedicated security for each chain, Concero V2 employs a unified security model:
+Concero V2 uses a cryptographic security model where message security depends on the selected relayer and verifier stack:
 
-- **Symbiotic integration**: Relayers stake through the [Symbiotic](https://docs.symbiotic.fi) protocol to secure their operations
-- **Chain-agnostic security**: A single stake secures relayer operations across all supported chains
-- **Slashing mechanisms**: Incorrect behavior results in stake slashing, ensuring economic alignment
-- **Security that scales**: The security model remains constant regardless of how many chains are onboarded
+- **Per-message security composition**: Applications choose relayer and verifier modules per message.
+- **Destination-side assertion**: Destination contracts authenticate/assert messages using app-defined policy.
+- **Module flexibility**: Teams can use Concero-run modules or custom modules, including permissionless implementations.
 
 ### Streamlined Transaction Flow
 
@@ -71,10 +70,10 @@ Concero V2's architecture maintains consistent performance regardless of how man
 
 1. User initiates a cross-chain message on the source chain
 2. Relayers detect the event and forward it to the Arbitrum-based Concero Verifier
-3. Chainlink Functions validates the transaction presence on the source chain
-4. Validation report is generated and sent back to the relayer
-5. Relayer delivers the validated message to the destination chain
-6. Destination chain verifies the report and processes the message
+3. Chainlink-powered verifier workflows cryptographically verify source-chain transaction presence
+4. A verification report is generated and sent back to the relayer
+5. Relayer delivers the verified message to the destination chain
+6. Destination app authenticates/asserts the message and processes it
 
 This process remains constant regardless of which chains are involved, providing predictable performance across the entire ecosystem.
 
@@ -85,7 +84,7 @@ Concero V2 transforms the economics of cross-chain interoperability:
 ### Minimal Integration Costs
 
 - **$0 onboarding fee**: No six-figure integration costs
-- **$0.01 per message**: Fixed, predictable pricing model
+- **Dynamic per-message pricing**: Fees are derived from relayer and verifier modules plus chain fee inputs
 - **No inflation**: Protocol doesn't require token inflation to support more chains
 
 ### Fixed Infrastructure Requirements
@@ -103,8 +102,8 @@ Concero V2 transforms the economics of cross-chain interoperability:
 | Time to Integrate | Hours/Days | Weeks/Months |
 | Node Requirements | Zero new nodes | Full/light nodes for each chain |
 | Relayer Configuration | Automatic | Manual |
-| Security Scaling | Fixed cost regardless of chain count | Cost scales with chain count |
-| Message Fee | $0.01 (fixed) | Variable, typically higher |
+| Security Model | Cryptographic, stack-defined | Typically fixed per protocol |
+| Message Fee | Dynamic (module and chain dependent) | Variable, typically higher |
 
 ## The Future of Interoperability as a Utility
 
@@ -116,3 +115,7 @@ Concero V2's architecture aligns with the vision of interoperability as a public
 4. **Future-proof scalability**: Architecture designed to support thousands of blockchains
 
 By transforming interoperability from a premium service to a universal utility, Concero V2 paves the way for a truly interconnected blockchain ecosystem capable of supporting the next generation of decentralized applications across thousands of specialized chains.
+
+:::note
+Custom RPC selection in relayer/verifier metadata is planned, but this functionality is not available yet.
+:::

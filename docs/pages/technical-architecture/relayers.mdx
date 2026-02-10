@@ -6,14 +6,16 @@ title: Concero V2 Relayers
 
 In **Concero V2**, relayers are **opt-in and per-message**.
 
-There is **no global relayer registration** and no “join/leave” flow. A relayer becomes usable as soon as it:
+There is **no protocol-level global relayer registry**. A relayer is selected per message through `messageRequest.relayerLib`.
 
-1. **deploys its own relayer contract** (a `relayerLib` that follows `IRelayerLib`), and
-2. users **explicitly select it** in their message request.
+In practice, usability depends on the selected `relayerLib` policy:
 
-If a user doesn’t point to your relayer, you will never see (or be responsible for) their messages.
+1. users **explicitly select** that `relayerLib`,
+2. and the `relayerLib` may enforce submitter authorization (for example, allowlists in Concero-run modules).
 
-> **Current status:** at the moment there is only **one relayer in production: `concero`**.
+If a user doesn’t point to your relayer module, you won’t be responsible for that message.
+
+> **Current status:** at the moment there is one Concero-run relayer in production: `concero`.
 
 
 ## Key idea: relayer = chosen `relayerLib`
@@ -25,6 +27,10 @@ Concero’s router treats the relayer as a **contract address** (`messageRequest
 
 So the network doesn’t maintain a “relayer set”. **Users pick the relayer by picking the relayer’s `relayerLib` address.**
 
+:::note
+The current relayer is run by Concero, and uses its allowlisted submitters. Apps can choose other custom relayer networks, including permissionless implementations.
+:::
+
 
 ## Relayer responsibilities (V2)
 
@@ -33,7 +39,7 @@ If users select your relayer (`relayerLib`) you’re expected to:
 1. **Monitor `ConceroMessageSent`** for your `relayerLib`
 2. **Build a destination submission**:
 
-* gather validator proofs (`validations`) corresponding to the message’s validators
+* gather verifier proofs (`validations`) corresponding to the message’s verifiers
 * call `submitMessage(...)` on the destination router
 3. **Maintain uptime + gas** on destination chains (and any infra needed to source proofs)
 4. **Handle failed deliveries**:
@@ -43,7 +49,7 @@ If users select your relayer (`relayerLib`) you’re expected to:
 
 ## Notes for integrators
 
-* The router does **not** enforce “at least N validators must pass” at the protocol level; it forwards `validationChecks` to the receiver. Your receiver contract can decide what it requires.
-* If a user selects a relayer that is down, **no one else will deliver** unless that relayer resumes (because the authorization policy is defined by the chosen `relayerLib`). So relayer choice is a real trust/availability decision.
+* The router does **not** enforce “at least N verifiers must pass” at the protocol level; it forwards `validationChecks` (verification checks) to the receiver. Your receiver contract decides what must be asserted.
+* If a selected relayer module has only one authorized submitter and it is down, delivery may halt. If the module authorizes multiple submitters, failover is possible.
 
 ---

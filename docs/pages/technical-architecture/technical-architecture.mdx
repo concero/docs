@@ -1,57 +1,65 @@
 ---
 title: Concero Motherboard Architecture
-description: Technical overview of Concero Motherboard, an open messaging protocol with customizable security and permissionless validation and delivery.
+description: Technical overview of Concero Motherboard, an open messaging protocol with customizable security and modular delivery.
 ---
 
 # Concero Motherboard Architecture
 
 ## Introduction
 
-Concero Motherboard is an open, modular messaging protocol enabling secure and scalable any-to-any network communication across EVM-compatible blockchains. It allows **any participant to act as a message relayer or validator**, providing a permissionless foundation for cross-chain interoperability.
+Concero Motherboard is an open, modular messaging protocol enabling secure and scalable any-to-any network communication across EVM-compatible blockchains. It lets applications choose the exact relayer and verifier modules they trust for each message.
 
-Concero V2 moves beyond fixed infrastructure and introduces **application-defined trust models**, letting developers select the exact validation logic that matches their use case.
+Concero V2 moves beyond fixed infrastructure and introduces **application-defined trust models**, letting developers select the exact verification logic that matches their use case.
 
 ## Key Shifts in V2
 
 Concero V2 represents a paradigm shift from pre-configured bridging infrastructure to a **flexible, public messaging layer**:
 
-- **Permissionless architecture**: Anyone can run a relayer, contribute validation, or build custom delivery logic.
+- **Composable architecture**: Teams can plug in custom relayer and verifier modules to match their trust model.
 - **Pluggable security stack**: Applications choose how strict or lightweight their security needs to be.
-- **Decentralized RPC sourcing**: Validation can be performed using multiple independent RPC endpoints.
-- **No centralized routing**: Messages are routed and validated by open actors, not hardcoded components.
+- **Decentralized RPC sourcing**: Verification pipelines can use multiple independent RPC endpoints.
+- **No centralized routing**: Messages are routed and verified by selected modules, not hardcoded global actors.
 
 ## Message Lifecycle in V2
 
 1. **Message creation**
-A message is emitted by a Concero-integrated smart contract on the source chain. The message includes metadata defining the required validation logic and delivery strategy.
+A message is emitted by a Concero-integrated smart contract on the source chain. The message includes metadata defining the required verification logic and delivery strategy.
 
 2. **Relayer engagement**
-A relayer — optionally specified by the message sender — picks up the message from the source chain. This relayer acts as a delivery orchestrator but remains untrusted, since all validation is subject to verification on-chain.
+A relayer — optionally specified by the message sender — picks up the message from the source chain. This relayer acts as a delivery orchestrator but remains untrusted, since message authenticity is asserted on the destination side.
 
-3. **Off-chain validation orchestration**
-The relayer executes the specified *Validation Stack* **off-chain**, which may include:
+3. **Off-chain verification orchestration**
+The relayer executes the specified *Verification Stack* **off-chain**, which may include:
 - Waiting for the required number of block confirmations or finality
 - Querying multiple RPC endpoints to verify chain state consistency
-- Invoking validator libraries or services to produce cryptographic proofs or attestations
+- Invoking verifier libraries or services to produce cryptographic proofs or attestations
 
-The relayer collects the necessary off-chain validation artifacts according to the rules defined by the application.
+The relayer collects the necessary off-chain verification artifacts according to the rules defined by the application.
 
 4. **Message delivery with proofs**
-Once the validation rules are satisfied, the relayer packages the message along with its corresponding proofs and submits them to the destination chain’s **Concero Router**. The router contract performs **on-chain verification** of the proofs, ensuring the message is authentic and valid.
+Once the verification rules are satisfied, the relayer packages the message along with its corresponding proofs and submits them to the destination chain’s **Concero Router**. The router performs module checks and forwards verification results; the destination application then authenticates and asserts the message using its policy.
 
 5. **Execution**
-If the proofs are valid and meet the required security policy, the message is accepted and executed by the target application.
+If the proofs satisfy the required security policy, the message is accepted and executed by the target application.
 
 
 ## Modular Components
 
 Concero V2 is composed of decoupled, reusable modules:
 
-- **Concero Router** — Entry point for incoming validated messages.
-- **Validator Libraries** — Modular validation logic that can be extended per application.
+- **Concero Router** — Entry point for incoming verified messages.
+- **Verifier Libraries** — Modular verification logic that can be extended per application.
 - **Relayers** — Stateless agents that fetch, prove, and deliver messages.
 
 Each module can evolve independently, and developers may substitute custom logic where needed.
+
+:::note
+Current Concero-run relayer/verifier modules are configured with allowlists and roles. Users can still choose other modules in their message stack, including permissionless implementations.
+:::
+
+:::note
+Custom RPC selection at the message-stack level is planned to be exposed via relayer and verifier metadata. This is not available yet.
+:::
 
 ## Trust Flexibility = Broader Use Cases
 
@@ -60,6 +68,6 @@ The modularity and openness of Concero V2 enable diverse use cases:
 - **DeFi protocols** enforcing strong finality with light client proofs
 - **Games** favoring low-latency, optimistic delivery
 - **Governance bridges** requiring multi-source agreement
-- **DAOs** using bonded relayers or slashable actors
+- **DAOs** using strict verifier quorum policies
 
 Concero V2 is an open interoperability protocol where security is a choice, not a constraint.

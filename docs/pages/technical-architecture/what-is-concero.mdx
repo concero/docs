@@ -2,20 +2,20 @@
 
 Concero is an open, permissionless messaging protocol that enables secure, cross-chain communication.
 
-Originally conceived as a tightly integrated system, Concero has evolved into a fully decentralized platform where **any participant** can **deliver and validate messages** between supported networks.
+Originally conceived as a tightly integrated system, Concero has evolved into a modular platform where applications choose how messages are delivered and verified between supported networks.
 
 ## Why Concero?
 
-- **Open participation** — Anyone can run a relayer or validator node without permission or registration.
-- **Secure by design** — Messages are validated by a network of independent actors, ensuring tamper-resistance and fault tolerance.
+- **Open composition** — Applications can choose their own relayer and verifier modules per message.
+- **Secure by design** — Messages are cryptographically verified and then authenticated/asserted by destination contracts.
 - **Cross-chain compatibility** — Concero connects multiple blockchains through a unified interface.
 - **Composable architecture** — Developers can integrate Concero at different levels: infrastructure, protocol, or application layer.
 
 ## How it works
 
-Concero is built around the concept of **flexible message security** — empowering applications to define their own trust and validation assumptions.
+Concero is built around the concept of **flexible message security** — empowering applications to define their own trust and verification assumptions.
 
-Every message passing through Concero can be independently configured with a **custom security stack**, giving developers granular control over how messages are validated and accepted.
+Every message passing through Concero can be independently configured with a **custom security stack**, giving developers granular control over how messages are verified and accepted.
 
 ### Key features of Concero Messaging:
 
@@ -23,15 +23,23 @@ Every message passing through Concero can be independently configured with a **c
 Each message can specify its own finality rules. Applications may require a certain number of block confirmations (e.g. 6 on Ethereum, 12 on Polygon), or rely on native chain finality mechanisms like BFT consensus or finalized checkpoints.
 
 - **Multi-RPC verification**
-You can specify one or more RPC endpoints from which block headers and proofs must be fetched and cross-validated. This protects against reliance on a single RPC provider and improves fault tolerance.
+Verification pipelines can use one or more RPC endpoints to fetch and cross-check chain state, reducing reliance on a single provider.
 
-- **Validator diversity**
-Messages can be verified using one or more pluggable validator libraries — from simple block hash matching to full signature-based verification or even light clients. Validators are fully modular.
+- **Verifier diversity**
+Messages can be verified using one or more pluggable verifier libraries — from simple block hash matching to full signature-based verification or even light clients. Verifier modules are fully modular.
 
 - **App-defined quorum rules**
-Applications can define their own consensus logic — such as "at least 2 of 3 trusted validators must agree", or "at least 5 unique relayers must independently verify this message".
+Applications can define their own consensus logic — such as "at least 2 of 3 trusted verifiers must agree".
 
-Concero does not enforce a single trust model. Instead, it provides the primitives — validators, codecs, relayers, and message rules — allowing developers to assemble the security architecture that matches their risk profile and application needs.
+Concero does not enforce a single trust model. Instead, it provides the primitives — verifiers (currently named `validatorLibs` in the contract interface), codecs, relayers, and message rules — allowing developers to assemble the security architecture that matches their risk profile and application needs.
+
+:::note
+Current Concero-run relayer and verifier modules are configured with allowlists/roles. Users can choose custom modules in their message stack, including permissionless implementations.
+:::
+
+:::note
+Custom RPC configuration in relayer/verifier metadata is planned, but this functionality is not available yet.
+:::
 
 
 ## Use cases

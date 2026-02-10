@@ -25,7 +25,7 @@ The new blockchain network must be registered in the public GitHub repository [`
 This configuration enables Concero tooling and services to recognize and interact with the chain.
 
 > **This step can be completed by the chain team themselves.**
-> Please follow the instructions in the official guide: [Add Your Network](https://docs.concero.io/get-started/add-your-network)
+> Please follow the instructions in the official guide: [Add Your Network](/integrate-concero/add-your-network)
 
 ---
 
@@ -34,7 +34,7 @@ This configuration enables Concero tooling and services to recognize and interac
 RPC endpoints must be submitted to the [`@concero/rpcs`](https://github.com/concero/rpcs) repository so that verifier and operators can communicate with the new chain.
 
 > **Chain teams can also submit this information directly.**
-> Detailed steps are provided in the [Add Your Network](https://docs.concero.io/get-started/add-your-network) documentation.
+> Detailed steps are provided in the [Add Your Network](/integrate-concero/add-your-network) documentation.
 
 ---
 
@@ -53,10 +53,7 @@ No manual configuration is needed after contract deployment.
 
 ### 6. Deployment of `ConceroRouter`
 
-The team deploys the `ConceroRouter` contract to the new chain. During initialization:
-
-* All remote chains in the router are marked with `isChainSupported = false`
-* No cross-chain routing is yet enabled
+The team deploys the `ConceroRouter` implementation and proxy for the new chain.
 
 ---
 
@@ -64,26 +61,31 @@ The team deploys the `ConceroRouter` contract to the new chain. During initializ
 
 > *Operators will automatically detect and begin monitoring the newly deployed ConceroRouter.*
 
-However, cross-chain events will not yet be emitted because all remote chains are still marked as unsupported (`isChainSupported = false`).
+At this point, message delivery still depends on relayer/verifier module configuration and off-chain workflow readiness.
 
 ---
 
-### 8. CLF Verifier Module Update
+### 8. CRE Verifier Module Update
 
-The Concero Team updates the Chainlink Functions (CLF) verifier module:
+The Concero Team updates verifier-side workflow configuration:
 
-* **Adding RPC endpoints** for the new network so CLF jobs can interact with it reliably
+* **Adding RPC endpoints** for the new network so workflows can interact with it reliably
 * Registers the address of the new `ConceroRouter`
 
 > *(This process will soon be automated and fetched directly from Git.)*
 
 ---
 
-### 9. Enable Cross-Chain Support
+### 9. Enable Delivery Path
 
-Finally, the Concero Team enables full routing support by:
+Finally, the team enables end-to-end delivery by:
 
-* Setting `isChainSupported = true` on **all** remote routers for the new chain
-* Updating the **new ConceroRouter** to support all existing chains
+* configuring relayer module authorization,
+* configuring verifier module parameters (for example signer sets/workflow IDs/gas limits),
+* ensuring off-chain reporting/worker services are live.
 
 At this point, the new blockchain becomes a fully integrated part of the Concero network and can begin sending and receiving cross-chain messages.
+
+:::note
+Custom RPC selection via relayer/verifier metadata is planned, but this functionality is not available yet.
+:::
