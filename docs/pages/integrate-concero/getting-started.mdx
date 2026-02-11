@@ -53,18 +53,3 @@ Follow [Receive a Message](/integrate-concero/receive-a-message) to validate rec
 ## Step 5: Track status end to end
 
 Use [Track a Message](/integrate-concero/track-a-message) with the returned `messageId`.
-
-## What the protocol enforces vs what you enforce
-
-| Layer | Enforced by protocol/contracts | Enforced by your app |
-|---|---|---|
-| Router auth | Router controls `submitMessage` flow and relayer authorization through `relayerLib.validate` | N/A |
-| Receiver auth | `ConceroClientBase` requires router-only caller and relayer allowlist | N/A |
-| Verifier checks | Router computes `validationChecks` from selected verifier libs | Your app decides verification policy in `ConceroClient` or custom `_validateMessageSubmission` |
-| Business logic | N/A | `_conceroReceive` implementation |
-
-## Next steps
-
-- If this is your first integration, continue with [Set up ConceroClient](/integrate-concero/set-up-conceroclient).
-- If you need operations and rollout guidance, read [Infrastructure Deployment Pipeline](/technical-architecture/deployment-pipeline).
-- For common failures, use [Troubleshooting](/integrate-concero/troubleshooting).

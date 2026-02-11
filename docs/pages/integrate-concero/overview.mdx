@@ -3,44 +3,37 @@ title: Integration Overview
 description: Source-chain and destination-chain responsibilities in Concero V2.
 ---
 
-# Integration Overview
+# DApp Integration Overview
 
 Concero V2 is a message protocol where each message defines its own delivery and verification stack.
 
 At a high level:
 
 1. Source app creates a `MessageRequest` and pays message fee.
-2. Router emits a packed message receipt.
-3. Selected relayer delivers submission to destination router.
-4. Destination router computes verifier checks.
-5. Destination app authenticates/asserts message and runs app logic.
+2. `ConceroRouter` emits a message receipt.
+3. Relayer requests message verification for the message and delivers it to destination router.
+4. Destination router receives the message, forwarding it to the app.
+5. Destination app verifies the message and runs its logic.
 
-## Mental model: two enforcement layers
+## Mental model: two layers
 
-### Layer 1: protocol execution
+### Protocol Layer
+Handled by router, relayers and verifiers:
 
-Handled by router + selected modules:
+- Fee quoting,
+- Message event emission,
+- Message verification,
+- Message delivery to destination router.
 
-- fee quote and collection,
-- relayer authorization (`relayerLib.validate`),
-- verifier check computation (`validationChecks`).
+### Application Layer
 
-### Layer 2: application acceptance
+Handled by your ConceroClient on the destination chain:
 
-Handled by your destination client contract:
+- accepting messages only from Concero Router,
+- allowing only trusted relayers and verifiers,
+- executing app logic in `_conceroReceive`.
 
-- accept calls only from trusted router,
-- allow only trusted relayer libs,
-- assert verifier checks according to your policy,
-- execute app logic in `_conceroReceive`.
-
-## Source chain responsibilities
-
-- Build `MessageRequest` with the right chain selector, relayer lib, and verifier libs.
-- Encode destination execution data (`receiver + gas limit`) with `MessageCodec.encodeEvmDstChainData`.
-- Call `getMessageFee` and pass returned value to `conceroSend` when paying native.
-
-## Destination chain responsibilities
+## Your Application Responsibilities
 
 - Configure `ConceroClient`/`ConceroClientBase` safely.
 - Allowlist relayer and verifier modules you trust.
