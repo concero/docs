@@ -1024,6 +1024,8 @@ export function SupportedNetworks() {
 
 	return (
 		<div>
+			<span id="mainnet" />
+			<span id="testnet" />
 			<div
 				style={{
 					display: 'flex',
