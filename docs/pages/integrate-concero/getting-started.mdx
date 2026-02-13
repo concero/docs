@@ -5,51 +5,20 @@ description: Fastest path to your first cross-chain message with Concero V2.
 
 # Getting Started (15 minutes)
 
-This page is the fastest path to your first working message flow.
+This page is the fastest path to your first working message flow. 
 
-You will complete a minimal setup in this order:
+Before you begin, make sure you have:
 
-1. Deploy a receiver contract that inherits `ConceroClient`.
-2. Configure trusted relayer and verifier modules.
-3. Send a message from a source chain.
-4. Verify delivery with API tracking and destination-chain logs.
+- Your Solidity project ready (`foundry` or `hardhat`).
+- Native gas token funded on both the source and destination chains.
 
-## Before you begin
+## Guide
+::::steps
+#### [Understand the responsibilities of Concero vs Your Contracts](/integrate-concero/overview)
 
-- Solidity project ready (`foundry` or `hardhat`).
-- One source chain and one destination chain from [Supported Networks](/integrate-concero/supported-networks).
-- Native gas token funded on both chains.
-- Router + module addresses copied for your target networks.
+#### [Set up your contracts to work with Concero](/integrate-concero/set-up-conceroclient)
 
-:::note
-Current interface naming still uses `validatorLibs`, `validatorConfigs`, and `validationChecks`. In docs we refer to these as verifier libraries/configs/checks.
-:::
+#### [Send and receive a message](/integrate-concero/send-a-message)
 
-## Step 1: Understand the flow
-
-Read [Integration Overview](/integrate-concero/overview) first. It explains who does what at source vs destination.
-
-## Step 2: Set up the destination receiver
-
-Follow [Set up ConceroClient](/integrate-concero/set-up-conceroclient):
-
-- inherit `ConceroClient`,
-- configure relayer/verifier allowlists,
-- set required verifier assertions,
-- implement `_conceroReceive(bytes)`.
-
-## Step 3: Send from source chain
-
-Follow [Send a Cross-Chain Message](/integrate-concero/send-a-message):
-
-- build `MessageRequest`,
-- quote fee with `getMessageFee`,
-- call `conceroSend` with native fee.
-
-## Step 4: Confirm delivery on destination chain
-
-Follow [Receive a Message](/integrate-concero/receive-a-message) to validate receiver policy and payload decoding.
-
-## Step 5: Track status end to end
-
-Use [Track a Message](/integrate-concero/track-a-message) with the returned `messageId`.
+####  [Track Message Status](/integrate-concero/track-a-message)
+::::

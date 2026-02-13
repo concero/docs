@@ -1,0 +1,95 @@
+---
+title: Types
+description: Canonical Concero message types from v2-contracts
+---
+
+# Types
+
+## `IConceroRouter.MessageRequest`
+
+This request is the single source of truth for pricing, receipt packing, relayer selection, and verifier setup.
+
+:::note
+Current interface naming uses `validatorLibs` and `validatorConfigs`. In this guide these refer to verifier libraries and verifier configs.
+:::
+
+
+
+```solidity
+// From @concero/contracts/interfaces/IConceroRouter.sol
+struct MessageRequest {
+    /// @notice Which chain the message should be delivered to.
+    /// @dev Concero uses chain selectors (not chain IDs) to route delivery.
+    uint24 dstChainSelector;
+
+    /// @notice How many source-chain block confirmations you want to wait for before the message
+    ///         is considered safe enough to deliver (reorg protection).
+    /// @dev Set based on your security needs: higher confirmations = safer, but slower delivery.
+    uint64 srcBlockConfirmations;
+
+    /// @notice Which token you pay fees in.
+    /// @dev Use address(0) for native; ERC20 support depends on selected relayer/verifier libs.
+    address feeToken;
+
+    /// @notice The relayer module you want to deliver this message.
+    /// @dev This is a per-message choice. If the user selects a relayer, only that relayer
+    ///      (per its own rules) is expected/allowed to submit the delivery.
+    address relayerLib;
+
+    /// @notice Which verifier modules you want to use to attest/verify this message.
+    /// @dev You choose the security model per message by choosing these modules.
+    address[] validatorLibs;
+
+    /// @notice Configuration for each verifier module.
+    /// @dev One config per verifier lib (must match validatorLibs length).
+    ///      Typical examples: verifier gas limits, thresholds, or module-specific params.
+    bytes[] validatorConfigs;
+
+    /// @notice Relayer-specific configuration for this message.
+    /// @dev Optional opaque bytes interpreted only by the chosen relayer implementation.
+    ///      Examples: service tier, delivery options, custom routing hints (depends on relayer).
+    bytes relayerConfig;
+
+    /// @notice Destination-specific execution parameters.
+    /// @dev For EVM destinations this defines:
+    ///      - who should be called on the destination (receiver)
+    ///      - how much gas to give that call (gasLimit)
+    ///      This is what makes the message actually executable on the target chain.
+    bytes dstChainData;
+
+    /// @notice The message data that will be delivered to the destination chain.
+    /// @dev This is arbitrary bytes. Concero does not impose a format here:
+    ///      - it can be raw bytes (e.g. "hello")
+    ///      - it can be an ABI-encoded struct
+    ///      - it can be a custom serialization your app understands
+    ///      The destination-side receiver decides how to interpret it.
+    bytes payload;
+}
+```
+
+## `MessageReceipt`
+
+Message receipt is packed `bytes`, encoded by `MessageCodec`.
+
+```solidity
+// From @concero/contracts/common/libraries/MessageCodec.sol
+
+// [!include ~/snippets/integrate-concero/message-receipt.sol]
+```
+
+## `EvmDstChainData`
+
+EvmDstChainData is packed `bytes`, encoded by `MessageCodec`.
+
+```solidity
+[0:20]  receiver (address)
+[20:24] dstGasLimit (uint32)
+```
+
+Use MessageCodec to encode and decode EVM destination chain data:
+
+```solidity
+bytes memory encodedDstChainData = MessageCodec.encodeEvmDstChainData(receiver, gasLimit); // Encode 
+
+(address receiver, uint32 gasLimit) = MessageCodec.decodeEvmDstChainData(dstChainData); // Decode
+```

@@ -149,12 +149,8 @@ export default defineConfig({
 					link: '/integrate-concero/set-up-conceroclient',
 				},
 				{
-					text: 'Send a message',
+					text: 'Send & Receive a message',
 					link: '/integrate-concero/send-a-message',
-				},
-				{
-					text: 'Receive a message',
-					link: '/integrate-concero/receive-a-message',
 				},
 				{
 					text: 'Track a message',
@@ -163,6 +159,10 @@ export default defineConfig({
 				{
 					text: 'Troubleshooting',
 					link: '/integrate-concero/troubleshooting',
+				},
+				{
+					text: 'Types',
+					link: '/integrate-concero/types',
 				},
 			],
 		},

@@ -14,7 +14,7 @@ The permissionless nature of Concero means _anyone_ can send messages to your co
 
 First, add the Concero contracts to your project:
 
-```bash
+```bash [Terminal]
 npm install @concero/contracts
 ```
 
@@ -53,21 +53,21 @@ contract YourDapp is ConceroClient {
 Follow these steps to deploy and configure your DApp contract.
 
 :::info
-Find the list of Concero Router, Verifier and Relayer addresses in [Supported Networks](/integrate-concero/supported-networks#testnet).
+Find the list of Concero Router, Verifier and Relayer addresses in [Deployments](/integrate-concero/supported-networks#testnet).
 :::
 
 ::::steps
 
-### Deploy Your Contract
+#### Deploy Your Contract
 
 Use the tool of your choice to deploy your contract (e.g. Foundry or Hardhat).
 During deployment, ensure you pass the correct `conceroRouter` address of a corresponding chain to the constructor.
 
-### Allow Relayer Libraries
+#### Allow Relayer Libraries
 
 `ConceroClientBase` requires you to allowlist the relayer libraries used to submit messages. Call **`_setIsRelayerLibAllowed(address relayerLib, bool isAllowed)`** to toggle whether a specific relayer library is trusted.
 
-### Allow Verifier Libraries
+#### Allow Verifier Libraries
 
 `ConceroClient` requires you to allowlist verifier libraries and set the number of required verifications.
 
@@ -78,22 +78,26 @@ During deployment, ensure you pass the correct `conceroRouter` address of a corr
 
 ## Message Lifecycle
 
-### 1. Message is Received by ConceroRouter
+::::steps
+
+#### 1. Message is Received by ConceroRouter
 
 - Relayer EOA delivers the message to ConceroRouter by calling `conceroReceive`
 - ConceroRouter verifies the Relayer's EOA in `RelayerLib` 
 - ConceroRouter asserts message verification in `VerifierLib`
 - ConceroRouter passes the message to Client
 
-### 2. Your Client Verifies Message
+#### 2. Your Client Verifies Message
 
 `ConceroClient` validates:
 - `msg.sender` is the allowlisted `ConceroRouter`
 - `relayer` EOA is allowlisted
 – Asserts that verifiers are allowlisted and the verification matches the message, by calling `_validateMessageSubmission(checks, libs)`
 
-### 3. Your App Logic Executes
+#### 3. Your App Logic Executes
 
 If all checks pass, `ConceroClient` calls `_conceroReceive(receipt)`.
 
 Decode the payload and run your dApp-specific business logic.
+
+::::
