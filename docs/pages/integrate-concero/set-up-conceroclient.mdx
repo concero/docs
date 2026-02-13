@@ -85,7 +85,7 @@ During deployment, ensure you pass the correct `conceroRouter` address of a corr
 - ConceroRouter asserts message verification in `VerifierLib`
 - ConceroRouter passes the message to Client
 
-### 2. Sender & Relayer Checks Run First
+### 2. Your Client Verifies Message
 
 `ConceroClient` validates:
 - `msg.sender` is the allowlisted `ConceroRouter`
