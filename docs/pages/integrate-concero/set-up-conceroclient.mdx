@@ -2,15 +2,15 @@
 title: Set up ConceroClient
 ---
 
-import { Mermaid } from '../../components/Mermaid'
-
 # Set up ConceroClient
 
-ConceroClient allows your dApp contracts to send and receive messages from Concero Routers.
+`ConceroClient` allows your dApp contracts to send and receive messages from Concero Routers.
 
-Anyone can attempt to submit cross-chain messages. If your contract is not configured to allowlist trusted relayer and verifier modules, this can lead to incorrect message acceptance. Therefore, it is critical to configure your client correctly.
+:::warning
+The permissionless nature of Concero means _anyone_ can send messages to your contracts. Therefore, it must accept messages only from trusted relayers and verifiers.
+:::
 
-## 1. Install Contracts
+## 1. Install Concero Contracts
 
 First, add the Concero contracts to your project:
 
@@ -18,7 +18,7 @@ First, add the Concero contracts to your project:
 npm install @concero/contracts
 ```
 
-## 2. Inherit from ConceroClient
+## 2. Inherit Your Contract from ConceroClient
 
 To make things easier, we recommend that your dApp contract inherits from `ConceroClient`. There's always an option to go lower level and inherit straight from `ConceroClientBase` to build custom message verification logic.
 
@@ -29,84 +29,71 @@ View the full source code for `ConceroClient.sol` on [GitHub](https://github.com
 ```solidity
 pragma solidity ^0.8.28;
 
-// @concero/contracts/ConceroClient/ConceroClient.sol
-abstract contract ConceroClient is ConceroClientBase {
-   constructor(address conceroRouter) ConceroClientBase(conceroRouter) {}
-}
-
 import {ConceroClient} from "@concero/contracts/ConceroClient/ConceroClient.sol";
 import {MessageCodec} from "@concero/contracts/common/libraries/MessageCodec.sol";
 
 contract YourDapp is ConceroClient {
     using MessageCodec for bytes;
-
+    
     constructor(address conceroRouter) ConceroClient(conceroRouter) {}
 
-    /// @dev This internal hook is where your business logic goes.
+    // Your app must override this function to handle incoming messages
     function _conceroReceive(bytes calldata messageReceipt) internal override {
-        // Decode the payload
-        bytes calldata payload = messageReceipt.calldataPayload();
+        
+        // Decode the message payload
+        bytes calldata messagePayload = messageReceipt.calldataPayload();
 
         // Use the decoded message payload for your business logic
-        // (e.g., abi.decode(payload, (uint256, address)))
+        // (e.g., abi.decode(messagePayload, (uint256, address)))
     }
 }
 ```
 
-## 3. Set up your Concero Client
-
-After developing your contract, follow these steps to deploy and configure it.
+## 3. Set up Your Contract
+Follow these steps to deploy and configure your DApp contract.
 
 :::info
-Find the list of Concero Router, Verifier and Relayer addresses on the [Supported Networks](/integrate-concero/supported-networks) page.
+Find the list of Concero Router, Verifier and Relayer addresses in [Supported Networks](/integrate-concero/supported-networks?tag=testnet).
 :::
 
 ::::steps
 
-### Deploy your contract
+### Deploy Your Contract
 
-
-
-Deploy your contract to the destination chain. During deployment, ensure you pass the correct `conceroRouter` address for that specific chain to the constructor.
+Use the tool of your choice to deploy your contract (e.g. Foundry or Hardhat).
+During deployment, ensure you pass the correct `conceroRouter` address of a corresponding chain to the constructor.
 
 ### Allow Relayer Libraries
 
-`ConceroClientBase` requires you to allowlist the relayer libraries used to submit messages. Use **`_setIsRelayerLibAllowed(address relayerLib, bool isAllowed)`** to toggle whether a specific relayer library is trusted.
+`ConceroClientBase` requires you to allowlist the relayer libraries used to submit messages. Call **`_setIsRelayerLibAllowed(address relayerLib, bool isAllowed)`** to toggle whether a specific relayer library is trusted.
 
 ### Allow Verifier Libraries
 
-`ConceroClient` requires you to allowlist verifier libraries that verify message authenticity. Use **`_setIsValidatorAllowed(address validatorLib, bool isAllowed)`** (current interface naming) to toggle whether a specific verifier library is trusted.
+`ConceroClient` requires you to allowlist verifier libraries and set the number of required verifications.
 
-### Set Required Verifier Count
-
-You must specify how many verifier assertions are required for a message to be considered valid by your contract. Use **`_setRequiredValidatorsCount(uint256 count)`** (current interface naming) to set the exact number of required verifications.
+- Call **`_setIsValidatorAllowed(address validatorLib, bool isAllowed)`** to allow the specific verifier library you trust.
+- Also call **`_setRequiredValidatorsCount(uint256 count)`** and set `count` to `1` for now (recommended for simplicity while using one verifier).
 
 ::::
 
 ## Message Lifecycle
 
-The following diagram illustrates how a message flows from the `ConceroRouter` to your application logic, including the internal security checks performed by `ConceroClient`.
+### 1. Message is Received by ConceroRouter
 
-<Mermaid chart={`
-sequenceDiagram
-    participant Router as ConceroRouter
-    participant Client as ConceroClient (Your dApp)
+- Relayer EOA delivers the message to ConceroRouter by calling `conceroReceive`
+- ConceroRouter verifies the Relayer's EOA in `RelayerLib` 
+- ConceroRouter asserts message verification in `VerifierLib`
+- ConceroRouter passes the message to Client
 
-    Note over Router, Client: Message Delivered on Destination Chain
+### 2. Sender & Relayer Checks Run First
 
-    Router->>Client: conceroReceive(receipt, checks, libs, relayer)
+`ConceroClient` validates:
+- `msg.sender` is the allowlisted `ConceroRouter`
+- `relayer` EOA is allowlisted
+– Asserts that verifiers are allowlisted and the verification matches the message, by calling `_validateMessageSubmission(checks, libs)`
 
-    activate Client
-    Note over Client: [1] SECURITY CHECKS
-    Client-->>Client: Authenticate msg.sender == ConceroRouter
-    Client-->>Client: Ensure relayerLib is in allowlist
+### 3. Your App Logic Executes
 
-    Note over Client: [2] VERIFICATION
-    Client->>Client: _validateMessageSubmission(checks, libs)
-    Note over Client: Ensure all required verifier<br/>checks are asserted and sources are allowlisted
+If all checks pass, `ConceroClient` calls `_conceroReceive(receipt)`.
 
-    Note over Client: [3] APPLICATION LOGIC
-    Client->>Client: _conceroReceive(receipt)
-    Note over Client: Decode payload and execute your<br/>business logic
-    deactivate Client
-`} />
+Decode the payload and run your dApp-specific business logic.

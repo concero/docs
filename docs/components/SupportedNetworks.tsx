@@ -45,6 +45,57 @@ interface InfoTableRow {
 type NetworkDetailsLookup = Record<string, NetworkDetails>
 type RpcBySelectorMap = Record<string, string[]>
 
+function parseEnvironmentTag(value: string | null): NetworkEnvironment | null {
+	if (!value) {
+		return null
+	}
+
+	const normalizedValue = value.trim().toLowerCase()
+
+	if (normalizedValue === 'mainnet' || normalizedValue === 'testnet') {
+		return normalizedValue
+	}
+
+	return null
+}
+
+function getEnvironmentFromLocation(location: Location): NetworkEnvironment | null {
+	const url = new URL(location.href)
+	const searchTag = parseEnvironmentTag(url.searchParams.get('tag'))
+
+	if (searchTag) {
+		return searchTag
+	}
+
+	const searchEnvironment = parseEnvironmentTag(url.searchParams.get('environment'))
+
+	if (searchEnvironment) {
+		return searchEnvironment
+	}
+
+	const searchNetwork = parseEnvironmentTag(url.searchParams.get('network'))
+
+	if (searchNetwork) {
+		return searchNetwork
+	}
+
+	const hashTag = parseEnvironmentTag(url.hash.replace(/^#/, ''))
+
+	if (hashTag) {
+		return hashTag
+	}
+
+	return null
+}
+
+function getInitialEnvironment(): NetworkEnvironment {
+	if (typeof window === 'undefined') {
+		return 'mainnet'
+	}
+
+	return getEnvironmentFromLocation(window.location) ?? 'mainnet'
+}
+
 function formatNetworkName(name: string): string {
 	return name
 		.replace(/_PROXY$/, '')
@@ -712,11 +763,35 @@ export function SupportedNetworks() {
 	const [rpcsBySelector, setRpcsBySelector] = useState<RpcBySelectorMap>({})
 	const [detailsStatus, setDetailsStatus] = useState<DetailsStatus>('idle')
 	const [detailsError, setDetailsError] = useState<string | null>(null)
-	const [environment, setEnvironment] = useState<NetworkEnvironment>('mainnet')
+	const [environment, setEnvironment] = useState<NetworkEnvironment>(getInitialEnvironment)
 	const [searchTerm, setSearchTerm] = useState('')
 	const networksCacheRef = useRef<Partial<Record<NetworkEnvironment, NetworksMap>>>({})
 	const networkDetailsCacheRef = useRef<Partial<Record<NetworkEnvironment, NetworkDetailsLookup>>>({})
 	const rpcsBySelectorCacheRef = useRef<RpcBySelectorMap | null>(null)
+
+	useEffect(() => {
+		if (typeof window === 'undefined') {
+			return
+		}
+
+		const syncEnvironmentFromUrl = () => {
+			const environmentFromLocation = getEnvironmentFromLocation(window.location)
+			if (!environmentFromLocation) {
+				return
+			}
+
+			setEnvironment(currentEnvironment =>
+				currentEnvironment === environmentFromLocation ? currentEnvironment : environmentFromLocation,
+			)
+		}
+
+		syncEnvironmentFromUrl()
+		window.addEventListener('popstate', syncEnvironmentFromUrl)
+
+		return () => {
+			window.removeEventListener('popstate', syncEnvironmentFromUrl)
+		}
+	}, [])
 
 	useEffect(() => {
 		let isActive = true
@@ -900,6 +975,26 @@ export function SupportedNetworks() {
 			isActive = false
 			controller.abort()
 		}
+	}, [environment])
+
+	const setUrlEnvironmentTag = (selected: NetworkEnvironment): void => {
+		if (typeof window === 'undefined') {
+			return
+		}
+
+		const url = new URL(window.location.href)
+		const currentTag = parseEnvironmentTag(url.searchParams.get('tag'))
+
+		if (currentTag === selected) {
+			return
+		}
+
+		url.searchParams.set('tag', selected)
+		window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`)
+	}
+
+	useEffect(() => {
+		setUrlEnvironmentTag(environment)
 	}, [environment])
 
 	const handleEnvironmentSelect = (selected: NetworkEnvironment): void => {
