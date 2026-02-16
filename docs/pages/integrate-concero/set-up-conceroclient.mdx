@@ -29,8 +29,8 @@ View the full source code for `ConceroClient.sol` on [GitHub](https://github.com
 ```solidity
 pragma solidity ^0.8.28;
 
-import {ConceroClient} from "@concero/contracts/ConceroClient/ConceroClient.sol";
-import {MessageCodec} from "@concero/contracts/common/libraries/MessageCodec.sol";
+import {ConceroClient} from "@concero/messaging-contracts-v2/contracts/ConceroClient/ConceroClient.sol";
+import {MessageCodec} from "@concero/messaging-contracts-v2/contracts/common/libraries/MessageCodec.sol";
 
 contract YourDapp is ConceroClient {
     using MessageCodec for bytes;
