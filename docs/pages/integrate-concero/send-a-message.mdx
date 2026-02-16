@@ -6,7 +6,7 @@ title: Send a Cross-Chain Message
 # Send a Cross-Chain Message
 
 :::note
-Before sending a message, make sure you deploy and configure your source and destination contracts with ConceroClient. 
+Before sending a message, make sure you deploy and configure your source and destination contracts with ConceroClient.
 See [Set up ConceroClient](/integrate-concero/set-up-conceroclient).
 :::
 
@@ -18,9 +18,9 @@ For other chains, see [Deployments](/integrate-concero/supported-networks).
 ```solidity
 pragma solidity ^0.8.28;
 
-import {ConceroClient} from "@concero/contracts/ConceroClient/ConceroClient.sol";
-import {IConceroRouter} from "@concero/contracts/interfaces/IConceroRouter.sol";
-import {MessageCodec} from "@concero/contracts/common/libraries/MessageCodec.sol";
+import {ConceroClient} from "@concero/messaging-contracts-v2/contracts/ConceroClient/ConceroClient.sol";
+import {IConceroRouter} from "@concero/messaging-contracts-v2/contracts/interfaces/IConceroRouter.sol";
+import {MessageCodec} from "@concero/messaging-contracts-v2/contracts/common/libraries/MessageCodec.sol";
 
 contract YourDapp is ConceroClient {
     constructor(address conceroRouter) ConceroClient(conceroRouter) {}
@@ -51,7 +51,7 @@ contract YourDapp is ConceroClient {
 
         // Quote total message fee (including relayer & verifier fee)
         uint256 fee = router.getMessageFee(req);
-        
+
         // Send message and obtain message ID
         messageId = router.conceroSend{value: fee}(req);
     }
@@ -59,7 +59,7 @@ contract YourDapp is ConceroClient {
 ```
 
 ## `ConceroMessageSent` Event
-If the message is successfully sent, the `ConceroMessageSent` event is emitted on the source chain. 
+If the message is successfully sent, the `ConceroMessageSent` event is emitted on the source chain.
 Relayers watch this event and pick messages that match their relayer library.
 
 ```solidity
@@ -77,23 +77,23 @@ If your destination chain contract is [correctly configured](/integrate-concero/
 
 ```solidity
 pragma solidity ^0.8.28;
- 
-import {ConceroClient} from "@concero/contracts/ConceroClient/ConceroClient.sol";
-import {MessageCodec} from "@concero/contracts/common/libraries/MessageCodec.sol";
- 
+
+import {ConceroClient} from "@concero/messaging-contracts-v2/contracts/ConceroClient/ConceroClient.sol";
+import {MessageCodec} from "@concero/messaging-contracts-v2/contracts/common/libraries/MessageCodec.sol";
+
 contract YourDapp is ConceroClient {
     using MessageCodec for bytes;
 
     event MessageReceived(bytes data, address sender, uint256 value);
-    
+
     constructor(address conceroRouter) ConceroClient(conceroRouter) {}
- 
+
     // Your app must override this function to handle incoming messages
     function _conceroReceive(bytes calldata messageReceipt) internal override {
-        
+
         // Obtain the message from the source chain sender
         bytes calldata messagePayload = messageReceipt.calldataPayload();
- 
+
         // Decode the message: bytes, address, uint256
         (bytes memory data, address sender, uint256 value) = abi.decode(messagePayload, (bytes, address, uint256));
     }
