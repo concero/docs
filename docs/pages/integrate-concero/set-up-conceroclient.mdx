@@ -15,7 +15,7 @@ The permissionless nature of Concero means _anyone_ can send messages to your co
 First, add the Concero contracts to your project:
 
 ```bash [Terminal]
-npm install @concero/contracts
+npm i @concero/messaging-contracts-v2
 ```
 
 ## 2. Inherit Your Contract from ConceroClient
@@ -34,12 +34,12 @@ import {MessageCodec} from "@concero/contracts/common/libraries/MessageCodec.sol
 
 contract YourDapp is ConceroClient {
     using MessageCodec for bytes;
-    
+
     constructor(address conceroRouter) ConceroClient(conceroRouter) {}
 
     // Your app must override this function to handle incoming messages
     function _conceroReceive(bytes calldata messageReceipt) internal override {
-        
+
         // Decode the message payload
         bytes calldata messagePayload = messageReceipt.calldataPayload();
 
@@ -83,7 +83,7 @@ During deployment, ensure you pass the correct `conceroRouter` address of a corr
 #### 1. Message is Received by ConceroRouter
 
 - Relayer EOA delivers the message to ConceroRouter by calling `conceroReceive`
-- ConceroRouter verifies the Relayer's EOA in `RelayerLib` 
+- ConceroRouter verifies the Relayer's EOA in `RelayerLib`
 - ConceroRouter asserts message verification in `VerifierLib`
 - ConceroRouter passes the message to Client
 
