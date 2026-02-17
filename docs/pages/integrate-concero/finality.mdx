@@ -1,0 +1,45 @@
+---
+title: Finality
+description:
+---
+
+import { FinalityTable } from '../../components/FinalityTable'
+
+# Finality
+
+// TODO: Add links to sources
+
+Finality determines how many block confirmations the protocol waits for before forwarding a message to the destination chain. It is controlled via the `srcBlockConfirmations` field in `MessageRequest`.
+
+## How to enable finality
+
+Set `srcBlockConfirmations` to `type(uint64).max` (`18446744073709551615`) to request finality-based confirmation instead of a fixed block count.
+
+```solidity
+IConceroRouter.MessageRequest({
+    dstChainSelector: dstChainSelector,
+    srcBlockConfirmations: type(uint64).max, // enable finality
+    // ...
+});
+```
+
+When finality is enabled, the Relayer waits until the source block is included in the chain's finalized head (`eth_getBlockByNumber("finalized")`). For chains where the finality tag is unavailable, the protocol falls back to a fixed `finalityConfirmations` count defined in the chain configuration.
+
+## Min block confirmations
+
+Each chain defines a minimum number of block confirmations (`minBlockConfirmations`). When `srcBlockConfirmations` is set to 0, the protocol automatically applies this minimum value. If the chain does not define one, the protocol defaults to 1.
+
+Use 0 when you want the fastest possible delivery without manually tracking per-chain safe minimums.
+
+Warning
+The following configurations lead to silent failure:
+    - dstChainSelector references a chain not supported by the protocol
+    - srcBlockConfirmations = type(uint64).max is set for a chain where finality is not supported (isFinalitySupported = false)
+††
+Always verify the destination chain selector and finality support before sending a message.
+
+## Supported chains
+
+Finality is only available on chains where `isFinalitySupported` or `finalityConfirmations` is set in the protocol's [chain configuration](https://github.com/concero/v2-networks/blob/master/networks/mainnet.json).
+
+<FinalityTable />

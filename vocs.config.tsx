@@ -153,6 +153,10 @@ export default defineConfig({
 					link: '/integrate-concero/send-a-message',
 				},
 				{
+					text: 'Finality',
+					link: '/integrate-concero/finality',
+				},
+				{
 					text: 'Track a message',
 					link: '/integrate-concero/track-a-message',
 				},
