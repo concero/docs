@@ -39,8 +39,7 @@ function parseRows(data: unknown): FinalityRow[] {
 		if (!name) continue
 
 		const chainSelector = entry.chainSelector != null ? String(entry.chainSelector) : '—'
-		const minBlockConfirmations =
-			typeof entry.minBlockConfirmations === 'number' ? entry.minBlockConfirmations : 1
+		const minBlockConfirmations = typeof entry.minBlockConfirmations === 'number' ? entry.minBlockConfirmations : 1
 
 		rows.push({
 			name,
@@ -50,9 +49,7 @@ function parseRows(data: unknown): FinalityRow[] {
 		})
 	}
 
-	return rows
-		.filter(row => row.finalityMethod !== 'none')
-		.sort((a, b) => a.name.localeCompare(b.name))
+	return rows.filter(row => row.finalityMethod !== 'none').sort((a, b) => a.name.localeCompare(b.name))
 }
 
 export function FinalityTable() {
@@ -115,7 +112,12 @@ export function FinalityTable() {
 			<table style={{ width: '100%', borderCollapse: 'collapse' }}>
 				<thead>
 					<tr>
-						{['SRC Blockchain', 'Chain selector', 'Finality (tag/block depth)', 'minBlockConfirmations'].map(col => (
+						{[
+							'SRC Blockchain',
+							'Chain selector',
+							'Finality (tag/finalityConfirmations)',
+							'minBlockConfirmations',
+						].map(col => (
 							<th
 								key={col}
 								style={{

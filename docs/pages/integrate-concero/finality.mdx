@@ -1,19 +1,17 @@
 ---
 title: Finality
-description:
+description: Learn about finality in Concero and how to enable it for secure message delivery across chains.
 ---
 
 import { FinalityTable } from '../../components/FinalityTable'
 
 # Finality
 
-// TODO: Add links to sources
-
-Finality determines how many block confirmations the protocol waits for before forwarding a message to the destination chain. It is controlled via the `srcBlockConfirmations` field in `MessageRequest`.
+Finality determines how many block confirmations the Relayer waits for before forwarding a message to the destination chain. Many blockchains support the `finalized` RPC tag. Where it is not supported, block depth is used to ensure safe finalization of L1 blocks and protection against [reorgs](https://blog.trailofbits.com/2023/08/23/the-engineers-guide-to-blockchain-finality/).
 
 ## How to enable finality
 
-Set `srcBlockConfirmations` to `type(uint64).max` (`18446744073709551615`) to request finality-based confirmation instead of a fixed block count.
+It is controlled via the `srcBlockConfirmations` field in `MessageRequest`.
 
 ```solidity
 IConceroRouter.MessageRequest({
@@ -23,23 +21,49 @@ IConceroRouter.MessageRequest({
 });
 ```
 
-When finality is enabled, the Relayer waits until the source block is included in the chain's finalized head (`eth_getBlockByNumber("finalized")`). For chains where the finality tag is unavailable, the protocol falls back to a fixed `finalityConfirmations` count defined in the chain configuration.
+:::danger
+ Be careful when configuring the message. If the message is configured incorrectly (invalid `dstChainSelector` or finality specified for chains that do not support it), it will not be reverted but will simply not reach the dst chain.
+:::
 
-## Min block confirmations
+**There are three possible ways to specify finality when sending a message:**
 
-Each chain defines a minimum number of block confirmations (`minBlockConfirmations`). When `srcBlockConfirmations` is set to 0, the protocol automatically applies this minimum value. If the chain does not define one, the protocol defaults to 1.
+-   If `srcBlockConfirmations` is specified as 0, we use `minBlockConfirmations`
+-   If `srcBlockConfirmations` is specified as `type(uint64).max`, then we rely on the `finality` tag or on `finalityConfirmations`
+-   If `srcBlockConfirmations` is specified explicitly, we use this value `[1 : type(uint64).max - 1]`
 
-Use 0 when you want the fastest possible delivery without manually tracking per-chain safe minimums.
+:::info
+`finalityConfirmations`: the number of blocks after which an L1 transaction is considered final (cannot be reverted and is protected against block reorganizations). Not all blockchains support the `finality` tag.
+:::
 
-Warning
-The following configurations lead to silent failure:
-    - dstChainSelector references a chain not supported by the protocol
-    - srcBlockConfirmations = type(uint64).max is set for a chain where finality is not supported (isFinalitySupported = false)
-††
-Always verify the destination chain selector and finality support before sending a message.
+:::info
+`minBlockConfirmations`: the minimum number of block confirmations required before a log event can be consumed. When `srcBlockConfirmations` is set to 0, the protocol automatically applies this minimum value. If the chain does not define one, the protocol defaults to 1.
+:::
+
+## Configuration file
+
+Finality data for a specific chain can be found in the [table below](#supported-chains) or in the [chain configuration](https://github.com/concero/v2-networks/blob/master/networks/mainnet.json) file on GitHub.
+
+The configuration file contains either a `finalityTagEnabled` or a `finalityConfirmations` field. If `minBlockConfirmations` is not specified, it defaults to 1.
+
+```json
+"arbitrum": {
+  "name": "arbitrum",
+  "chainId": 42161,
+  "chainSelector": 42161,
+  // ...
+  "finalityTagEnabled": true,
+  "minBlockConfirmations": 3,
+  // ...
+  "finalityConfirmations": 100 // used if the "finalized" tag is not supported, or when it is safer to rely on block depth
+}
+```
+
+:::warning
+Block depth-based finality does not guarantee irreversibility. On chains without `finalityTagEnabled` support, chain reorgs remain possible and may affect message delivery.
+:::
 
 ## Supported chains
 
-Finality is only available on chains where `isFinalitySupported` or `finalityConfirmations` is set in the protocol's [chain configuration](https://github.com/concero/v2-networks/blob/master/networks/mainnet.json).
+Finality is only available on chains where `finalityTagEnabled` is true or `finalityConfirmations` is set in the protocol's [chain configuration](https://github.com/concero/v2-networks/blob/master/networks/mainnet.json).
 
 <FinalityTable />
