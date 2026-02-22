@@ -66,11 +66,11 @@ export default defineConfig({
 			items: [
 				{
 					text: 'V2 Messaging Contracts',
-					link: 'http://github.com/concero/messaging-contracts-v2',
+					link: 'https://github.com/concero/messaging-contracts-v2',
 				},
 				{
 					text: 'V2 Operators',
-					link: 'http://github.com/concero/v2-operators',
+					link: 'https://github.com/concero/v2-operators',
 				},
 			],
 		},
