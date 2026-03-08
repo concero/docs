@@ -1,0 +1,69 @@
+---
+title: Finality
+description: Learn about finality in Concero and how to enable it for secure message delivery across chains.
+---
+
+import { FinalityTable } from '../../components/FinalityTable'
+
+# Finality
+
+Finality determines how many block confirmations the Relayer waits for before forwarding a message to the destination chain. Many blockchains support the `finalized` RPC tag. Where it is not supported, block depth is used to ensure safe finalization of L1 blocks and protection against [reorgs](https://blog.trailofbits.com/2023/08/23/the-engineers-guide-to-blockchain-finality/).
+
+## How to enable finality
+
+It is controlled via the `srcBlockConfirmations` field in `MessageRequest`.
+
+```solidity
+IConceroRouter.MessageRequest({
+    dstChainSelector: dstChainSelector,
+    srcBlockConfirmations: type(uint64).max, // enable finality
+    // ...
+});
+```
+
+:::danger
+ Be careful when configuring the message. If the message is configured incorrectly (invalid `dstChainSelector` or finality specified for chains that do not support it), it will not be reverted but will simply not reach the dst chain.
+:::
+
+**There are three possible ways to specify finality when sending a message:**
+
+-   If `srcBlockConfirmations` is specified as 0, we use `minBlockConfirmations`
+-   If `srcBlockConfirmations` is specified as `type(uint64).max`, then we rely on the `finality` tag or on `finalityConfirmations`
+-   If `srcBlockConfirmations` is specified explicitly, we use this value `[1 : type(uint64).max - 1]`
+
+:::info
+`finalityConfirmations`: the number of blocks after which an L1 transaction is considered final (cannot be reverted and is protected against block reorganizations). Not all blockchains support the `finality` tag.
+:::
+
+:::info
+`minBlockConfirmations`: the minimum number of block confirmations required before a log event can be consumed. When `srcBlockConfirmations` is set to 0, the protocol automatically applies this minimum value. If the chain does not define one, the protocol defaults to 1.
+:::
+
+## Configuration file
+
+Finality data for a specific chain can be found in the [table below](#supported-chains) or in the [chain configuration](https://github.com/concero/v2-networks/blob/master/networks/mainnet.json) file on GitHub.
+
+The configuration file contains either a `finalityTagEnabled` or a `finalityConfirmations` field. If `minBlockConfirmations` is not specified, it defaults to 1.
+
+```json
+"arbitrum": {
+  "name": "arbitrum",
+  "chainId": 42161,
+  "chainSelector": 42161,
+  // ...
+  "finalityTagEnabled": true,
+  "minBlockConfirmations": 3,
+  // ...
+  "finalityConfirmations": 100 // used if the "finalized" tag is not supported, or when it is safer to rely on block depth
+}
+```
+
+:::warning
+Block depth-based finality does not guarantee irreversibility. On chains without `finalityTagEnabled` support, chain reorgs remain possible and may affect message delivery.
+:::
+
+## Supported chains
+
+Finality is only available on chains where `finalityTagEnabled` is true or `finalityConfirmations` is set in the protocol's [chain configuration](https://github.com/concero/v2-networks/blob/master/networks/mainnet.json).
+
+<FinalityTable />
